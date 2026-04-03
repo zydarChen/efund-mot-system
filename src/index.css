@@ -1,0 +1,547 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ===== 浅色主题 (默认) ===== */
+  :root {
+    /* === 易方达 MOT 设计系统 v2.0 === */
+    /* 主色: 深蓝 #005096 + 青色 #2fc5e7 企业级扁平设计 */
+
+    /* 核心色板 */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    /* 卡片 */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    /* 弹窗 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* 主色 - 深蓝 #005096 */
+    --primary: 207 85% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    /* 次色 */
+    --secondary: 214 20% 94%;
+    --secondary-foreground: 222 47% 20%;
+
+    /* 柔和色 */
+    --muted: 214 18% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* 强调色 - 青色 #2fc5e7 */
+    --accent: 191 78% 55%;
+    --accent-foreground: 191 90% 12%;
+
+    /* 危险色 */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* 边框 */
+    --border: 214 20% 88%;
+    --input: 214 20% 90%;
+    --ring: 207 85% 42%;
+
+    /* 圆角 */
+    --radius: 0.25rem;
+
+    /* 金色 - 财富/价值 */
+    --gold: 38 88% 52%;
+    --gold-foreground: 38 88% 10%;
+    --gold-muted: 38 30% 93%;
+
+    /* 状态色 */
+    --success: 152 62% 38%;
+    --success-foreground: 152 62% 10%;
+    --warning: 38 88% 52%;
+    --warning-foreground: 38 88% 10%;
+    --info: 207 85% 42%;
+    --info-foreground: 207 85% 10%;
+
+    /* 侧边栏 */
+    --sidebar: 220 18% 97%;
+    --sidebar-foreground: 215 15% 40%;
+    --sidebar-accent: 207 85% 42%;
+    --sidebar-border: 214 20% 90%;
+
+    /* 渐变 */
+    --gradient-primary: linear-gradient(135deg, hsl(207 85% 42%), hsl(191 78% 55%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 88% 52%), hsl(30 80% 46%));
+    --gradient-success: linear-gradient(135deg, hsl(152 62% 38%), hsl(170 60% 36%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 97%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(220 18% 98%), hsl(220 18% 96%));
+    --gradient-hero: linear-gradient(135deg, hsl(207 60% 96%), hsl(210 20% 98%) 60%, hsl(191 30% 96%));
+
+    /* 阴影 */
+    --shadow-sm: 0 1px 2px hsl(214 20% 50% / 0.06);
+    --shadow-md: 0 2px 8px hsl(214 20% 50% / 0.08);
+    --shadow-lg: 0 6px 20px hsl(214 20% 50% / 0.12);
+    --shadow-glow-primary: 0 0 12px hsl(207 85% 42% / 0.1);
+    --shadow-glow-gold: 0 0 12px hsl(38 88% 52% / 0.08);
+    --shadow-glow-success: 0 0 12px hsl(152 62% 38% / 0.08);
+
+    /* 过渡 */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ===== 深色主题 ===== */
+  .dark {
+    /* 核心色板 */
+    --background: 222 44% 7%;
+    --foreground: 210 15% 92%;
+
+    /* 卡片 */
+    --card: 222 38% 10%;
+    --card-foreground: 210 15% 92%;
+
+    /* 弹窗 */
+    --popover: 222 38% 10%;
+    --popover-foreground: 210 15% 92%;
+
+    /* 主色 - 深蓝 (暗色适配) */
+    --primary: 207 85% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    /* 次色 */
+    --secondary: 220 28% 15%;
+    --secondary-foreground: 210 15% 88%;
+
+    /* 柔和色 */
+    --muted: 220 22% 13%;
+    --muted-foreground: 215 12% 52%;
+
+    /* 强调色 - 青色 */
+    --accent: 191 78% 55%;
+    --accent-foreground: 191 78% 95%;
+
+    /* 危险色 */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* 边框 */
+    --border: 220 20% 17%;
+    --input: 220 20% 19%;
+    --ring: 207 85% 42%;
+
+    /* 金色 */
+    --gold: 38 88% 52%;
+    --gold-foreground: 38 88% 10%;
+    --gold-muted: 38 30% 16%;
+
+    /* 状态色 */
+    --success: 152 62% 42%;
+    --success-foreground: 152 62% 95%;
+    --warning: 38 88% 52%;
+    --warning-foreground: 38 88% 10%;
+    --info: 207 85% 42%;
+    --info-foreground: 207 85% 95%;
+
+    /* 侧边栏 */
+    --sidebar: 222 45% 6%;
+    --sidebar-foreground: 215 15% 60%;
+    --sidebar-accent: 207 85% 42%;
+    --sidebar-border: 220 22% 13%;
+
+    /* 图表色 — 暗色适配 */
+    --chart-grid: 220 20% 18%;
+    --chart-axis: 215 12% 50%;
+
+    /* 渐变 - 深色 */
+    --gradient-primary: linear-gradient(135deg, hsl(207 85% 42%), hsl(191 78% 55%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 88% 52%), hsl(30 80% 46%));
+    --gradient-success: linear-gradient(135deg, hsl(152 62% 42%), hsl(170 60% 40%));
+    --gradient-surface: linear-gradient(180deg, hsl(222 38% 11%), hsl(222 44% 7%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(222 45% 7.5%), hsl(222 45% 5%));
+    --gradient-hero: linear-gradient(135deg, hsl(207 60% 12%), hsl(222 44% 7%) 60%, hsl(191 30% 10%));
+
+    /* 阴影 - 深色 */
+    --shadow-sm: 0 1px 2px hsl(222 44% 3% / 0.3);
+    --shadow-md: 0 2px 8px hsl(222 44% 3% / 0.4);
+    --shadow-lg: 0 6px 20px hsl(222 44% 3% / 0.5);
+    --shadow-glow-primary: 0 0 12px hsl(207 85% 42% / 0.15);
+    --shadow-glow-gold: 0 0 12px hsl(38 88% 52% / 0.12);
+    --shadow-glow-success: 0 0 12px hsl(152 62% 42% / 0.12);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* 自定义滚动条 - 更纤细 */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.15);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.25);
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--border) / 0.4);
+  }
+  
+  .glass-strong {
+    background: hsl(var(--card) / 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+  
+  .glow-primary {
+    box-shadow: var(--shadow-glow-primary);
+  }
+  
+  .glow-gold {
+    box-shadow: var(--shadow-glow-gold);
+  }
+  
+  .glow-success {
+    box-shadow: var(--shadow-glow-success);
+  }
+  
+  .gradient-text-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gradient-text-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Logo 渐变文字 - 蓝→青 */
+  .gradient-text-logo {
+    background: linear-gradient(135deg, hsl(207 85% 55%), hsl(191 78% 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .animate-stagger > * {
+    animation: fade-in 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .animate-stagger > *:nth-child(2) { animation-delay: 50ms; }
+  .animate-stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .animate-stagger > *:nth-child(4) { animation-delay: 150ms; }
+  .animate-stagger > *:nth-child(5) { animation-delay: 200ms; }
+  .animate-stagger > *:nth-child(6) { animation-delay: 250ms; }
+  .animate-stagger > *:nth-child(7) { animation-delay: 300ms; }
+  .animate-stagger > *:nth-child(8) { animation-delay: 350ms; }
+
+  /* Kanban卡片慢脉动（紧急任务用） */
+  .animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+}
+
+/* ===== 14寸笔记本小屏适配 (≤1440px) ===== */
+@media (max-width: 1440px) {
+  /* 缩小基础字号 */
+  body {
+    font-size: 13px;
+  }
+
+  /* 紧凑卡片间距 */
+  .p-6 {
+    padding: 1rem;
+  }
+
+  /* 表格紧凑 */
+  table th,
+  table td {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Dialog/Modal 边距保护 */
+  [role="dialog"] > div {
+    max-width: 94vw !important;
+  }
+}
+
+/* ===== 更小屏幕适配 (≤1366px，如老款14寸) ===== */
+@media (max-width: 1366px) {
+  body {
+    font-size: 12.5px;
+  }
+
+  /* 主内容区更紧凑的内边距 */
+  main {
+    padding: 0.75rem !important;
+  }
+
+  /* KPI 卡片文字缩小 */
+  .text-2xl {
+    font-size: 1.375rem;
+  }
+
+  .text-3xl {
+    font-size: 1.625rem;
+  }
+
+  /* 按钮紧凑 */
+  .gap-4 {
+    gap: 0.75rem;
+  }
+}
+
+/* ===== 演示模式 (Presentation) ===== */
+.pres-mode {
+  --pres-bg-from: #0D1B2A;
+  --pres-bg-to: #001E3D;
+  --pres-card: #142336;
+  --pres-card-border: rgba(47, 197, 231, 0.12);
+  --pres-accent: #2FC5E7;
+  --pres-primary: #005096;
+  --pres-gold: #D4A017;
+  --pres-success: #10B981;
+  --pres-text: #FFFFFF;
+  --pres-text-secondary: #94A3B8;
+  --pres-text-dim: #64748B;
+}
+
+.pres-mode {
+  background: linear-gradient(135deg, var(--pres-bg-from), var(--pres-bg-to));
+  color: var(--pres-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
+/* 幻灯片容器 */
+.pres-slide {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 5vh 7vw;
+}
+
+/* 幻灯片切换动画 */
+.pres-slide-enter {
+  opacity: 0;
+  transform: translateX(60px);
+}
+.pres-slide-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pres-slide-exit {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 入场动画 */
+@keyframes pres-fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pres-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pres-scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pres-slide-right {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pres-glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(47, 197, 231, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(47, 197, 231, 0.3); }
+}
+@keyframes pres-ring-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.05); }
+}
+
+.pres-animate-up {
+  animation: pres-fade-up 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.pres-animate-in {
+  animation: pres-fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.pres-animate-scale {
+  animation: pres-scale-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.pres-animate-right {
+  animation: pres-slide-right 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Stagger 延迟 */
+.pres-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+.pres-stagger > *:nth-child(2) { animation-delay: 0.2s; }
+.pres-stagger > *:nth-child(3) { animation-delay: 0.3s; }
+.pres-stagger > *:nth-child(4) { animation-delay: 0.4s; }
+.pres-stagger > *:nth-child(5) { animation-delay: 0.5s; }
+.pres-stagger > *:nth-child(6) { animation-delay: 0.6s; }
+.pres-stagger > *:nth-child(7) { animation-delay: 0.7s; }
+.pres-stagger > *:nth-child(8) { animation-delay: 0.8s; }
+
+/* 演示卡片 */
+.pres-card {
+  background: var(--pres-card);
+  border: 1px solid var(--pres-card-border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pres-card:hover {
+  border-color: rgba(47, 197, 231, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.pres-card-highlight {
+  border-color: var(--pres-accent);
+  box-shadow: 0 0 20px rgba(47, 197, 231, 0.15);
+}
+
+/* 强调线 */
+.pres-accent-line {
+  width: 48px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pres-accent), var(--pres-primary));
+  border-radius: 2px;
+}
+
+/* 发光圆环 */
+.pres-glow-ring {
+  border-radius: 50%;
+  border: 2px solid rgba(47, 197, 231, 0.2);
+  box-shadow: 0 0 30px rgba(47, 197, 231, 0.1), inset 0 0 30px rgba(47, 197, 231, 0.05);
+  animation: pres-ring-pulse 4s ease-in-out infinite;
+}
+
+/* 渐变文字 */
+.pres-gradient-text {
+  background: linear-gradient(135deg, #2FC5E7, #005096);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 进度条 */
+.pres-progress-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pres-primary), var(--pres-accent));
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+
+/* ===== 嵌入式幻灯片浏览器 ===== */
+.pres-slide-embedded {
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 */
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--pres-bg-from, #0D1B2A), var(--pres-bg-to, #001E3D));
+}
+.pres-slide-embedded .pres-slide {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: unset !important;
+  padding: 3% 5% !important;
+}
+.pres-slide-embedded .pres-slide .text-\[28px\] {
+  font-size: 1.1em;
+}
+
+.pres-viewer-wrapper {
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  overflow: hidden;
+  background: hsl(var(--card));
+}
+
+.pres-thumbnail-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pres-thumbnail-item:hover {
+  background: hsl(var(--secondary));
+}
+.pres-thumbnail-active {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+/* ===== Recharts 图表主题适配 ===== */
+/* 网格线 */
+.recharts-cartesian-grid line {
+  stroke: hsl(var(--border)) !important;
+}
+/* 坐标轴线 */
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: hsl(var(--border)) !important;
+}
+/* 坐标轴标签 */
+.recharts-cartesian-axis-tick text {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+/* 极坐标网格 */
+.recharts-polar-grid-concentric circle,
+.recharts-polar-grid-concentric polygon,
+.recharts-polar-grid-angle line {
+  stroke: hsl(var(--border)) !important;
+}
+/* 极坐标轴标签 */
+.recharts-polar-angle-axis-tick text {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+.recharts-polar-radius-axis-tick text {
+  fill: hsl(var(--muted-foreground)) !important;
+}

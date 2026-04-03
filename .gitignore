@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+
+# Environment variables (sensitive)
+*.local
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.qoder
+.vercel
+.vercel-tmp
+
+# Data & Documents (sensitive client data)
+data/
+docs/
+
+# Misc
+*.log
