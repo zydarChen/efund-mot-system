@@ -144,45 +144,137 @@ function getStrategySource(motRule: string) {
   return strategySourceMap[motRule] || { source: 'manual' as const }
 }
 
+// ===== 千人千面推荐类型 =====
+type RecommendedTool = { name: string; category: string; description: string }
+type RecommendedContent = { title: string; category: string; format: string }
+type AIRecommendation = {
+  message?: string
+  tools: RecommendedTool[]
+  contents: RecommendedContent[]
+  reasoning: string
+}
+
+const toolCategoryIcons: Record<string, React.ElementType> = {
+  '互动福利类': Heart, '模拟/竞赛类': BarChart3, '计算工具类': TrendingUp,
+  '定投专区类': RefreshCw, '资金规划类': Shield, '选基/指数工具类': Search,
+  '智能交流类': MessageSquare, '产品/经理详情类': User, '研究资讯类': Sparkles,
+  '小程序工具类': Smartphone, '直播互动类': PlayCircle, '投教课程/栏目类': Brain,
+  'H5/落地页类': ArrowUpRight,
+}
+
+const contentCategoryIcons: Record<string, React.ElementType> = {
+  '报告解读类': BarChart3, '长图物料类': Pencil, '一页通物料类': CheckCircle2,
+  '行情资讯栏目类': TrendingUp, '数字人相关内容类': Sparkles, '视频内容类': PlayCircle,
+  '对客海报类': LayoutGrid, '营销模板类': Mail, 'PPT资料类': LayoutGrid,
+  '小易系列内容类': Heart, '周报资料类': Clock, '专项资料类': Shield,
+}
+
+const formatBadgeColors: Record<string, string> = {
+  '视频': 'bg-accent/15 text-accent border-accent/20',
+  '研报': 'bg-primary/15 text-primary border-primary/20',
+  '长图': 'bg-warning/15 text-warning border-warning/20',
+  '一页通': 'bg-success/15 text-success border-success/20',
+  'H5': 'bg-gold/15 text-gold border-gold/20',
+  '直播': 'bg-destructive/15 text-destructive border-destructive/20',
+  '课程': 'bg-primary/15 text-primary border-primary/20',
+}
+
+function serializeRecommendation(rec: AIRecommendation): string {
+  const parts: string[] = []
+  if (rec.message) parts.push(`[推荐话术]\n${rec.message}`)
+  if (rec.tools.length > 0) parts.push(`[推荐工具]\n${rec.tools.map((t, i) => `${i + 1}. ${t.name}（${t.category}）— ${t.description}`).join('\n')}`)
+  if (rec.contents.length > 0) parts.push(`[推荐内容]\n${rec.contents.map((c, i) => `${i + 1}. ${c.title}（${c.format}·${c.category}）`).join('\n')}`)
+  parts.push(`[AI推荐理由]\n${rec.reasoning}`)
+  return parts.join('\n\n')
+}
+
 // AI suggestions map
 const aiSuggestions: Record<string, {
   emotion: string; emoji: string; confidence: number
-  script: string
+  recommendation: AIRecommendation
   compliance: { status: 'pass' | 'warning' | 'block'; issues: string[] }
   channel: string; timing: string
   retentionRate: number
 }> = {
   T003: {
     emotion: '焦虑不安', emoji: '😰', confidence: 87,
-    script: '周婷女士您好，我是您的专属客服。注意到您近期投资遇到了一些波动，这是很正常的市场现象。我们整理了一份个性化的持仓诊断报告，方便和您电话沟通10分钟吗？',
+    recommendation: {
+      message: '周婷女士您好，我是您的专属客服。注意到您近期投资遇到了一些波动，这是很正常的市场现象。我们整理了一份个性化的持仓诊断报告，方便和您电话沟通10分钟吗？',
+      tools: [
+        { name: '定投智能回测工具', category: '模拟/竞赛类', description: '回测历史定投收益走势，直观展示长期持有的复利效应，帮助缓解短期波动焦虑' },
+        { name: '持仓亏损压力测试器', category: '计算工具类', description: '模拟极端行情下的最大亏损幅度，量化风险边界，给予客户掌控感' },
+      ],
+      contents: [
+        { title: '3分钟看懂：基金亏损时最常犯的3个错误', category: '视频内容类', format: '视频' },
+      ],
+      reasoning: '客户情绪稳定性极低(12/100)，近期连续发布4条负面社区帖子且频繁追涨杀跌。推荐回测工具帮助客户量化长期持有收益，搭配压力测试器缓解失控感。配合短视频教育内容（匹配客户偏好的短视频格式）引导理性决策，避免推荐任何交易类工具防止加剧追涨杀跌行为。',
+    },
     compliance: { status: 'pass', issues: [] },
     channel: '客服电话', timing: '14:00-16:00（客户活跃时段）',
     retentionRate: 78,
   },
   T004: {
     emotion: '愤怒不满', emoji: '😤', confidence: 92,
-    script: '周婷女士，非常抱歉给您带来不好的体验。作为主管，我将全程跟进您反馈的问题。我们已为您准备了专属补偿方案，包括VIP服务升级和手续费减免。',
+    recommendation: {
+      message: '周婷女士，非常抱歉给您带来不好的体验。作为主管，我将全程跟进您反馈的问题。我们已为您准备了专属补偿方案，包括VIP服务升级和手续费减免。',
+      tools: [],
+      contents: [
+        { title: '易方达客户权益保障与服务承诺', category: '一页通物料类', format: '一页通' },
+      ],
+      reasoning: '客户正处于愤怒投诉升级状态（本月投诉8次，满意度仅28/100）。此时推送任何投资工具或营销内容将适得其反，AI决策为最小化触达策略：仅保留真诚道歉话术与权益保障文件，优先修复信任关系。待情绪回落后再启动教育引导方案。',
+    },
     compliance: { status: 'warning', issues: ['补偿方案需合规审批'] },
     channel: '专属客服', timing: '立即处理（紧急）',
     retentionRate: 65,
   },
   T005: {
     emotion: '平静期待', emoji: '😊', confidence: 78,
-    script: '孙明远先生，生日快乐！感谢您一直以来对易方达的信任。我们为您准备了专属生日权益：定投费率限时8折+100积分礼品。祝您投资顺利！',
+    recommendation: {
+      message: '孙明远先生，生日快乐！感谢您一直以来对易方达的信任。我们为您准备了专属生日权益：定投费率限时8折+100积分礼品。祝您投资顺利！',
+      tools: [
+        { name: 'AI智能选基助手', category: '选基/指数工具类', description: '基于持仓分析与市场趋势，智能筛选匹配客户风险偏好的优质基金' },
+        { name: '家庭资产配置规划器', category: '资金规划类', description: '结合家庭收支、子女教育、退休规划等维度，生成个性化资产配置方案' },
+      ],
+      contents: [
+        { title: '2026Q1创新药赛道深度报告与持仓诊断', category: '报告解读类', format: '研报' },
+      ],
+      reasoning: '客户为专家级投资者（知识水平92/100），数据研报重度消费者（年阅读85份研报）。生日关怀结合其核心兴趣：推送关注的创新药行业深度研报创造专业价值，搭配智能选基工具匹配其"组合优化"使用习惯。近期晋升主任医师且加薪，适合引入家庭资产规划器。',
+    },
     compliance: { status: 'pass', issues: [] },
     channel: 'APP推送', timing: '生日当天 08:00',
     retentionRate: 92,
   },
   T006: {
     emotion: '满意理性', emoji: '😌', confidence: 85,
-    script: '张建国先生，恭喜您近期的事业进步！考虑到您收入的增长，我们建议将月定投金额从1万提升至1.5万，并优化组合中的债券比例。附上详细配置建议供参考。',
+    recommendation: {
+      message: '张建国先生，恭喜您近期的事业进步！考虑到您收入的增长，我们建议将月定投金额从1万提升至1.5万，并优化组合中的债券比例。附上详细配置建议供参考。',
+      tools: [
+        { name: '智能定投金额优化器', category: '定投专区类', description: '根据收入变动自动计算最优定投金额，匹配现有沪深300定投计划' },
+        { name: '收入变动资产再配置计算器', category: '资金规划类', description: '模拟薪资上调后的资产再平衡方案，优化7只基金的配置比例' },
+      ],
+      contents: [
+        { title: '加薪后的理财黄金法则（一图读懂）', category: '长图物料类', format: '长图' },
+        { title: '2026年稳健配置策略白皮书', category: '报告解读类', format: '研报' },
+      ],
+      reasoning: '客户刚获晋升副总经理，薪资上调15%，投资决策理性（决策质量82/100）且偏好深度研报。推荐定投优化器帮助量化新定投方案，配置计算器辅助全组合再平衡。搭配长图物料便于邮件快速阅读，另附白皮书满足其深度阅读需求。组合覆盖"即时行动工具+决策支撑内容"双维度。',
+    },
     compliance: { status: 'pass', issues: [] },
     channel: '邮件', timing: '20:00-22:00（最佳阅读时段）',
     retentionRate: 95,
   },
   T009: {
     emotion: '平静尊贵', emoji: '😎', confidence: 82,
-    script: '刘洋先生，提前祝您生日快乐！作为VIP客户，我们为您安排了专属生日权益：线下品鉴会邀请函+年度资产配置复盘面谈。您方便哪天参加呢？',
+    recommendation: {
+      tools: [
+        { name: 'VIP专属基金经理1对1直播预约', category: '直播互动类', description: '为VIP客户安排专属基金经理线上面谈，深度解析185万资产组合' },
+        { name: '年度专属资产配置复盘报告', category: '产品/经理详情类', description: '基于全年交易记录与市场复盘，生成个性化年度资产诊断报告' },
+      ],
+      contents: [
+        { title: 'AI数字人定制生日祝福视频', category: '数字人相关内容类', format: 'H5' },
+        { title: '2026全球AI算力产业链独家投资机会', category: '专项资料类', format: '研报' },
+      ],
+      reasoning: '客户为VIP高净值客户（185万资产），社交影响力高（KOL分75）。生日关怀采用"尊享体验+精准内容"策略：AI数字人视频创造个性化惊喜体验，VIP基金经理1对1直播体现尊贵待遇。推送其高度关注的AI算力产业研报确保内容价值。未添加话术文案——对VIP客户由专属客服口头传达更显诚意。',
+    },
     compliance: { status: 'pass', issues: [] },
     channel: '专属客服', timing: '提前7天联系',
     retentionRate: 88,
@@ -1108,14 +1200,82 @@ function AIServiceBrainModal({ task, onClose, showToast }: { task: ServiceTask; 
                     <span className="text-[10px] text-muted-foreground">执行本策略后</span>
                   </div>
                 </div>
-                <div className="rounded border border-border p-3">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-[11px] text-muted-foreground">推荐触达内容</p>
-                    <button className="text-muted-foreground hover:text-primary transition-colors" title="复制内容" onClick={() => { navigator.clipboard.writeText(ai.script); setCopied(true); setTimeout(() => setCopied(false), 1500) }}>
+                <div className="rounded border border-border p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-semibold text-muted-foreground">推荐触达内容</p>
+                    <button className="text-muted-foreground hover:text-primary transition-colors" title="复制内容" onClick={() => { navigator.clipboard.writeText(serializeRecommendation(ai.recommendation)); setCopied(true); setTimeout(() => setCopied(false), 1500) }}>
                       {copied ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                     </button>
                   </div>
-                  <p className="text-xs text-foreground/80 leading-relaxed">{ai.script}</p>
+                  {/* AI 推荐理由 */}
+                  <div className="rounded bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 px-2.5 py-2">
+                    <p className="text-[10px] font-bold text-primary flex items-center gap-1 mb-1">
+                      <Sparkles className="h-3 w-3" /> AI推荐理由
+                    </p>
+                    <p className="text-[10px] text-foreground/70 leading-relaxed">{ai.recommendation.reasoning}</p>
+                  </div>
+                  {/* 推荐话术 */}
+                  {ai.recommendation.message && (
+                    <div className="border-t border-border/40 pt-3">
+                      <p className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1 mb-1.5">
+                        <MessageSquare className="h-2.5 w-2.5" /> 推荐话术
+                      </p>
+                      <div className="border-l-2 border-primary/20 pl-2.5">
+                        <p className="text-xs text-foreground/80 leading-relaxed italic">{ai.recommendation.message}</p>
+                      </div>
+                    </div>
+                  )}
+                  {/* 推荐工具 */}
+                  {ai.recommendation.tools.length > 0 && (
+                    <div className="border-t border-border/40 pt-3">
+                      <p className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1 mb-1.5">
+                        <Zap className="h-2.5 w-2.5" /> 推荐工具
+                        <span className="rounded-full bg-primary/10 text-primary px-1.5 py-0 text-[9px] font-bold">{ai.recommendation.tools.length}</span>
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {ai.recommendation.tools.map(tool => {
+                          const ToolIcon = toolCategoryIcons[tool.category] || Zap
+                          return (
+                            <div key={tool.name} className="rounded bg-secondary/50 border border-border/50 p-2 hover:border-primary/30 transition-colors">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <ToolIcon className="h-3.5 w-3.5 text-primary shrink-0" />
+                                <span className="text-[9px] text-muted-foreground truncate">{tool.category}</span>
+                              </div>
+                              <p className="text-[11px] font-medium text-foreground leading-tight mb-0.5">{tool.name}</p>
+                              <p className="text-[10px] text-muted-foreground line-clamp-2">{tool.description}</p>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {/* 推荐内容 */}
+                  {ai.recommendation.contents.length > 0 && (
+                    <div className="border-t border-border/40 pt-3">
+                      <p className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1 mb-1.5">
+                        <Pencil className="h-2.5 w-2.5" /> 推荐内容
+                        <span className="rounded-full bg-accent/10 text-accent px-1.5 py-0 text-[9px] font-bold">{ai.recommendation.contents.length}</span>
+                      </p>
+                      <div className="space-y-1.5">
+                        {ai.recommendation.contents.map(content => {
+                          const ContentIcon = contentCategoryIcons[content.category] || Pencil
+                          const badgeColor = formatBadgeColors[content.format] || 'bg-secondary text-muted-foreground border-border'
+                          return (
+                            <div key={content.title} className="flex items-start gap-2 rounded bg-secondary/50 border border-border/50 p-2">
+                              <ContentIcon className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[11px] font-medium text-foreground line-clamp-1">{content.title}</p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[9px] text-muted-foreground">{content.category}</span>
+                                  <span className={`text-[9px] px-1.5 py-0 rounded-full border font-medium ${badgeColor}`}>{content.format}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className={`rounded border p-3 ${
                   ai.compliance.status === 'pass' ? 'border-success/30 bg-success/5'

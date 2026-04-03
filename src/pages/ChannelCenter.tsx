@@ -1,6 +1,6 @@
 // 易方达 MOT 系统 - 触达中心
 // 来源：ICP-MOT消息推送平台 + 玄武ICC通信平台 + 广发博时数字化营销方案
-// 三大功能：渠道管理 | 内容工厂 | 消息管控
+// 三大功能：触点管理 | 内容工厂 | 消息管控
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -11,6 +11,7 @@ import {
   FileText, Tag, Filter, ToggleLeft, ToggleRight, Eye, Copy, TrendingUp,
   ArrowDownRight, Shield, Search, BarChart3, ChevronRight,
   Activity, MousePointer, ShoppingCart,
+  Sparkles, Wrench, Users, RefreshCw, Heart, PlayCircle, BookOpen, Pencil, MapPin,
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, Cell } from 'recharts'
 import { deliveryChannels, routingRules, contentTemplates, messageControlRules, channelTrends, motInstances, conversionFunnelData } from '@/data/channelData'
@@ -23,7 +24,7 @@ const iconMap: Record<string, React.ElementType> = {
 type TabType = 'channels' | 'content' | 'control' | 'tracking'
 
 const tabs: { key: TabType; label: string; icon: React.ElementType }[] = [
-  { key: 'channels', label: '渠道管理', icon: Send },
+  { key: 'channels', label: '触点管理', icon: Send },
   { key: 'content', label: '内容工厂', icon: Layers },
   { key: 'control', label: '消息管控', icon: ShieldCheck },
   { key: 'tracking', label: '链路追踪', icon: GitBranch },
@@ -50,7 +51,7 @@ export default function ChannelCenter() {
         <div>
           <h1 className="text-lg font-bold text-foreground">触达中心</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {activeTab === 'channels' ? '智能渠道路由与通信矩阵管理' :
+            {activeTab === 'channels' ? '全渠道触点矩阵与触达位置管理' :
              activeTab === 'content' ? '陪伴式内容模板工厂' :
              activeTab === 'control' ? '消息合规管控体系' :
              '全链路实例追踪与转化漏斗'}
@@ -289,13 +290,128 @@ function ChannelManagementTab() {
 }
 
 // ===== Tab 2: 内容工厂 =====
+
+// 投资财富工具数据
+const wealthTools = [
+  { id: 'WT01', name: '蚂蚁福利社', category: '互动福利类', desc: '互动福利签到、抽奖、答题红包等趣味营销工具', usage: 12680, status: 'active' as const },
+  { id: 'WT02', name: '蚂蚁答题翻红包', category: '互动福利类', desc: '基金知识问答+红包奖励，提升投教互动率', usage: 8940, status: 'active' as const },
+  { id: 'WT03', name: '蚂蚁投资模拟大赛', category: '模拟/竞赛类', desc: '零风险模拟投资竞赛，培养客户投资兴趣与信心', usage: 3250, status: 'active' as const },
+  { id: 'WT04', name: '养老税优计算器', category: '计算工具类', desc: '个人养老金税收优惠精准计算，支持不同收入档位试算', usage: 6780, status: 'active' as const },
+  { id: 'WT05', name: '易方达养老计算器', category: '计算工具类', desc: '退休缺口分析+定投方案推荐，助力客户养老规划', usage: 5120, status: 'active' as const },
+  { id: 'WT06', name: '蚂蚁定投专区', category: '定投专区类', desc: '智能定投策略推荐、回测工具、定投组合管理', usage: 15200, status: 'active' as const },
+  { id: 'WT07', name: '亲子定投（宝贝计划）', category: '定投专区类', desc: '为子女教育金配置定投计划，可视化成长曲线', usage: 4560, status: 'active' as const },
+  { id: 'WT08', name: '养老定投（未来投）', category: '定投专区类', desc: '养老场景专属定投方案，下滑加仓+目标止盈', usage: 3890, status: 'active' as const },
+  { id: 'WT09', name: '蚂蚁闲钱规划', category: '资金规划类', desc: '闲置资金智能配置，短中长期资金分层管理', usage: 7650, status: 'active' as const },
+  { id: 'WT10', name: 'AI智能选基助手', category: '选基/指数工具类', desc: '基于客户画像与市场趋势，AI自动推荐匹配基金', usage: 9870, status: 'active' as const },
+  { id: 'WT11', name: '指数通（指数联盟）', category: '选基/指数工具类', desc: '指数温度计+行业链图谱，帮助客户理解指数投资', usage: 6340, status: 'active' as const },
+  { id: 'WT12', name: '蚂蚁智能讨论室', category: '智能交流类', desc: 'AI驱动的在线讨论社区，实时解答投资疑问', usage: 4120, status: 'active' as const },
+  { id: 'WT13', name: '易观察研究（宏观数据）', category: '研究资讯类', desc: '宏观经济数据实时追踪与可视化解读', usage: 5680, status: 'active' as const },
+  { id: 'WT14', name: '每日财经早报', category: '研究资讯类', desc: '每日市场资讯精编：开盘要闻、盘中速递、收盘点评', usage: 18900, status: 'active' as const },
+  { id: 'WT15', name: '易定投小程序', category: '小程序工具类', desc: '微信生态内的轻量定投工具，降低使用门槛', usage: 11200, status: 'active' as const },
+  { id: 'WT16', name: '310易方达指数通车直播', category: '直播互动类', desc: '每日ETF盘后直播+基金经理问答，增强客户粘性', usage: 8760, status: 'active' as const },
+  { id: 'WT17', name: '小e说FOF', category: '投教课程/栏目类', desc: 'FOF产品系列投教课程，通俗讲解组合投资理念', usage: 3450, status: 'active' as const },
+  { id: 'WT18', name: '季报解读H5', category: 'H5/落地页类', desc: '基金季报可视化解读，数据图表+基金经理观点', usage: 7890, status: 'active' as const },
+]
+
+const toolCatIcons: Record<string, React.ElementType> = {
+  '互动福利类': Heart, '模拟/竞赛类': BarChart3, '计算工具类': TrendingUp,
+  '定投专区类': RefreshCw, '资金规划类': Shield, '选基/指数工具类': Search,
+  '智能交流类': MessageSquare, '研究资讯类': Sparkles, '小程序工具类': Smartphone,
+  '直播互动类': PlayCircle, '投教课程/栏目类': BookOpen, 'H5/落地页类': Globe,
+  '产品/经理详情类': Users,
+}
+
+// 营销内容数据
+const marketingContents = [
+  { id: 'MC01', name: '季度报告摘要', category: '报告解读类', format: '研报', desc: '基金季报核心数据提炼与观点解读，适合专业客户', usage: 6540, status: 'active' as const },
+  { id: 'MC02', name: '持仓客户长图', category: '长图物料类', format: '长图', desc: '个性化持仓分析长图，一图读懂组合表现', usage: 8920, status: 'active' as const },
+  { id: 'MC03', name: '养老产品月度长图', category: '长图物料类', format: '长图', desc: '养老产品月度运作数据可视化长图', usage: 3210, status: 'active' as const },
+  { id: 'MC04', name: '一页通产品概览', category: '一页通物料类', format: '一页通', desc: '单页纸精炼产品核心卖点、业绩、经理简介', usage: 7650, status: 'active' as const },
+  { id: 'MC05', name: '310每日市场播报', category: '行情资讯栏目类', format: '视频', desc: '每日3分10秒市场速览，覆盖大盘、板块、热点', usage: 15600, status: 'active' as const },
+  { id: 'MC06', name: '数字人基金季报', category: '数字人相关内容类', format: 'H5', desc: 'AI数字人播报基金季报，提升阅读体验与互动性', usage: 4580, status: 'active' as const },
+  { id: 'MC07', name: '产品介绍短视频', category: '视频内容类', format: '视频', desc: '60秒产品亮点短视频，适合社交媒体分发', usage: 12300, status: 'active' as const },
+  { id: 'MC08', name: 'IP形象节日海报', category: '对客海报类', format: '长图', desc: '节日关怀+品牌IP视觉海报，增强情感连接', usage: 9870, status: 'active' as const },
+  { id: 'MC09', name: '爆款营销模板', category: '营销模板类', format: '一页通', desc: '热销基金营销文案模板，支持个性化参数替换', usage: 5430, status: 'active' as const },
+  { id: 'MC10', name: '指数基础跟踪PPT', category: 'PPT资料类', format: '研报', desc: '指数产品跟踪周报/月报PPT，适合渠道经理使用', usage: 2340, status: 'active' as const },
+  { id: 'MC11', name: '小易问答系列', category: '小易系列内容类', format: '视频', desc: '小易IP动画问答：平台余额、保险箱、权益等', usage: 6780, status: 'active' as const },
+  { id: 'MC12', name: '稳健产品周报', category: '周报资料类', format: '研报', desc: '固收+产品每周运作数据与市场展望', usage: 4120, status: 'active' as const },
+  { id: 'MC13', name: 'AI快讯速递', category: '专项资料类', format: '视频', desc: 'AI自动生成的市场快讯短视频，实时热点解读', usage: 11500, status: 'active' as const },
+  { id: 'MC14', name: '数字大使工厂巡礼', category: '专项资料类', format: 'H5', desc: '虚拟数字人带领客户参观基金运作流程', usage: 1890, status: 'active' as const },
+]
+
+const contentCatIcons: Record<string, React.ElementType> = {
+  '报告解读类': BarChart3, '长图物料类': Pencil, '一页通物料类': FileText,
+  '行情资讯栏目类': TrendingUp, '数字人相关内容类': Sparkles, '视频内容类': PlayCircle,
+  '对客海报类': Tag, '营销模板类': Mail, 'PPT资料类': FileText,
+  '小易系列内容类': Heart, '周报资料类': Clock, '专项资料类': Shield,
+}
+
+const fmtColors: Record<string, string> = {
+  '视频': 'bg-accent/15 text-accent border-accent/20',
+  '研报': 'bg-primary/15 text-primary border-primary/20',
+  '长图': 'bg-warning/15 text-[hsl(var(--warning))] border-warning/20',
+  '一页通': 'bg-success/15 text-success border-success/20',
+  'H5': 'bg-[hsl(var(--gold))/15] text-[hsl(var(--gold))] border-[hsl(var(--gold))/20]',
+}
+
+// AI千人千面示例数据
+const aiPersonalizedExamples = [
+  {
+    customer: '张建国', type: '稳健价值型', trigger: '收入变动配置建议',
+    items: [
+      { kind: 'tool' as const, name: '智能定投金额优化器', cat: '定投专区类' },
+      { kind: 'tool' as const, name: '收入变动资产再配置计算器', cat: '资金规划类' },
+      { kind: 'content' as const, name: '加薪后的理财黄金法则（一图读懂）', cat: '长图物料类', format: '长图' },
+      { kind: 'content' as const, name: '2026年稳健配置策略白皮书', cat: '报告解读类', format: '研报' },
+      { kind: 'message' as const, name: '专属话术：恭喜您的事业进步，建议优化定投与债券配置比例' },
+    ],
+    reasoning: '客户刚获晋升，薪资上调15%。推荐定投优化器+配置计算器帮助即时行动，搭配长图和白皮书匹配其深度阅读偏好。',
+  },
+  {
+    customer: '周婷', type: '积极交易型', trigger: '基金净值大幅回撤预警',
+    items: [
+      { kind: 'tool' as const, name: '定投智能回测工具', cat: '模拟/竞赛类' },
+      { kind: 'tool' as const, name: '持仓亏损压力测试器', cat: '计算工具类' },
+      { kind: 'content' as const, name: '3分钟看懂：基金亏损时最常犯的3个错误', cat: '视频内容类', format: '视频' },
+      { kind: 'message' as const, name: '专属话术：注意到您近期投资波动，已整理个性化持仓诊断报告' },
+    ],
+    reasoning: '客户情绪稳定性极低，频繁追涨杀跌。推荐回测工具+压力测试器缓解焦虑，配合短视频引导理性决策。',
+  },
+  {
+    customer: '刘洋', type: 'VIP高净值', trigger: '生日专属关怀',
+    items: [
+      { kind: 'tool' as const, name: 'VIP专属基金经理1对1直播预约', cat: '直播互动类' },
+      { kind: 'tool' as const, name: '年度专属资产配置复盘报告', cat: '产品/经理详情类' },
+      { kind: 'content' as const, name: 'AI数字人定制生日祝福视频', cat: '数字人相关内容类', format: 'H5' },
+      { kind: 'content' as const, name: '2026全球AI算力产业链独家投资机会', cat: '专项资料类', format: '研报' },
+    ],
+    reasoning: 'VIP客户(185万资产)，采用"尊享体验+精准内容"策略：1对1直播+AI数字人视频+AI研报。未发话术——由专属客服口头传达更显诚意。',
+  },
+  {
+    customer: '孙明远', type: '专家型投资者', trigger: '生日关怀',
+    items: [
+      { kind: 'tool' as const, name: 'AI智能选基助手', cat: '选基/指数工具类' },
+      { kind: 'tool' as const, name: '家庭资产配置规划器', cat: '资金规划类' },
+      { kind: 'content' as const, name: '2026Q1创新药赛道深度报告', cat: '报告解读类', format: '研报' },
+      { kind: 'message' as const, name: '专属话术：生日快乐！专属生日权益：定投费率8折+100积分' },
+    ],
+    reasoning: '专家级投资者(知识水平92/100)，重度研报消费者。推送关注的创新药研报+智能选基工具匹配其组合优化习惯。',
+  },
+]
+
 function ContentFactoryTab() {
+  const [subTab, setSubTab] = useState<'templates' | 'tools' | 'contents' | 'ai'>('templates')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [copied, setCopied] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [toolSearch, setToolSearch] = useState('')
+  const [toolCatFilter, setToolCatFilter] = useState('all')
+  const [contentSearch, setContentSearch] = useState('')
+  const [contentCatFilter, setContentCatFilter] = useState('all')
 
+  // 消息模板相关
   const categories = [
     { key: 'all', label: '全部', count: contentTemplates.length },
     { key: 'volatility_companion', label: '波动陪伴', count: contentTemplates.filter(t => t.category === 'volatility_companion').length },
@@ -305,29 +421,47 @@ function ContentFactoryTab() {
     { key: 'risk_alert', label: '风险提醒', count: contentTemplates.filter(t => t.category === 'risk_alert').length },
     { key: 'compliance', label: '合规通知', count: contentTemplates.filter(t => t.category === 'compliance').length },
   ]
-
   const filteredTemplates = contentTemplates.filter(t => {
     const matchCategory = selectedCategory === 'all' || t.category === selectedCategory
     const matchSearch = !searchQuery || t.name.includes(searchQuery) || t.content.includes(searchQuery)
     return matchCategory && matchSearch
   })
-
   const template = selectedTemplate ? contentTemplates.find(t => t.id === selectedTemplate) : null
-
-  // 统计
   const approvedCount = contentTemplates.filter(t => t.complianceStatus === 'approved').length
   const totalUsage = contentTemplates.reduce((s, t) => s + t.usageCount, 0)
-  const avgCheckPoints = Math.round(contentTemplates.reduce((s, t) => s + t.complianceCheckPoints, 0) / contentTemplates.length)
+
+  // 工具相关
+  const toolCats = ['all', ...Array.from(new Set(wealthTools.map(t => t.category)))]
+  const filteredTools = wealthTools.filter(t => {
+    const matchCat = toolCatFilter === 'all' || t.category === toolCatFilter
+    const matchSearch = !toolSearch || t.name.includes(toolSearch) || t.desc.includes(toolSearch)
+    return matchCat && matchSearch
+  })
+
+  // 内容相关
+  const contentCats = ['all', ...Array.from(new Set(marketingContents.map(c => c.category)))]
+  const filteredContents = marketingContents.filter(c => {
+    const matchCat = contentCatFilter === 'all' || c.category === contentCatFilter
+    const matchSearch = !contentSearch || c.name.includes(contentSearch) || c.desc.includes(contentSearch)
+    return matchCat && matchSearch
+  })
+
+  const subTabs = [
+    { key: 'templates' as const, label: '消息模板', icon: MessageSquare, count: contentTemplates.length },
+    { key: 'tools' as const, label: '投资财富工具', icon: Wrench, count: wealthTools.length },
+    { key: 'contents' as const, label: '营销内容', icon: Layers, count: marketingContents.length },
+    { key: 'ai' as const, label: 'AI千人千面', icon: Brain, count: aiPersonalizedExamples.length },
+  ]
 
   return (
     <div className="space-y-4">
-      {/* KPI */}
+      {/* KPI 统计 */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {[
-          { label: '模板总数', value: contentTemplates.length.toString(), sub: `${approvedCount}个已审核通过`, color: 'primary' },
-          { label: '累计使用', value: (totalUsage / 10000).toFixed(1) + '万次', sub: '全模板累计', color: 'success' },
-          { label: 'AI合规检测', value: '587个', sub: '检测点覆盖', color: 'accent' },
-          { label: '平均检测点', value: avgCheckPoints + '个', sub: '每模板平均', color: 'gold' },
+          { label: '消息模板', value: contentTemplates.length.toString(), sub: `${approvedCount}个已审核通过`, color: 'primary' },
+          { label: '投资财富工具', value: wealthTools.length.toString(), sub: `覆盖${toolCats.length - 1}大类别`, color: 'accent' },
+          { label: '营销内容', value: marketingContents.length.toString(), sub: `${Array.from(new Set(marketingContents.map(c => c.format))).length}种内容格式`, color: 'success' },
+          { label: 'AI千人千面', value: '实时生成', sub: '基于客户画像×MOT规则', color: 'gold' },
         ].map(kpi => (
           <div key={kpi.label} className="rounded-lg border border-border bg-card p-3">
             <p className="text-[10px] text-muted-foreground">{kpi.label}</p>
@@ -342,212 +476,372 @@ function ContentFactoryTab() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {/* 模板列表 */}
-        <div className="col-span-2 space-y-3">
-          {/* 搜索 + 分类 */}
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="搜索模板名称或内容..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="h-7 w-full rounded border border-border bg-card pl-7 pr-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none"
-              />
+      {/* 子 Tab 切换 */}
+      <div className="flex items-center gap-1 border-b border-border pb-0">
+        {subTabs.map(tab => {
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setSubTab(tab.key)}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors -mb-px ${
+                subTab === tab.key
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label}
+              <span className={`text-[9px] px-1.5 py-0 rounded-full ${
+                subTab === tab.key ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'
+              }`}>{tab.count}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ====== 消息模板 Tab ====== */}
+      {subTab === 'templates' && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                <input type="text" placeholder="搜索模板名称或内容..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                  className="h-7 w-full rounded border border-border bg-card pl-7 pr-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none" />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {categories.map(cat => (
+                <button key={cat.key} onClick={() => setSelectedCategory(cat.key)}
+                  className={`text-[11px] px-2 py-1 rounded-full transition-colors ${
+                    selectedCategory === cat.key ? 'bg-primary/10 text-primary font-medium' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                  }`}>
+                  {cat.label}<span className="ml-1 text-[9px] opacity-60">{cat.count}</span>
+                </button>
+              ))}
+            </div>
+            <div className="space-y-2 max-h-[520px] overflow-y-auto">
+              {filteredTemplates.map(t => (
+                <button key={t.id} onClick={() => setSelectedTemplate(selectedTemplate === t.id ? null : t.id)}
+                  className={`w-full text-left rounded-lg border p-3 transition-all duration-200 ${
+                    selectedTemplate === t.id ? 'border-primary bg-primary/4' : 'border-border bg-card hover:border-primary/20'
+                  }`}>
+                  <div className="flex items-start justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
+                        t.category === 'volatility_companion' ? 'bg-destructive/10 text-destructive' :
+                        t.category === 'holding_companion' ? 'bg-primary/10 text-primary' :
+                        t.category === 'marketing' ? 'bg-accent/10 text-accent' :
+                        t.category === 'risk_alert' ? 'bg-warning/10 text-[hsl(var(--warning))]' :
+                        t.category === 'compliance' ? 'bg-muted text-muted-foreground' :
+                        'bg-success/10 text-success'
+                      }`}>{t.categoryLabel}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
+                        t.timingType === 'T+0' ? 'bg-success/8 text-success' : t.timingType === 'T+3' ? 'bg-primary/8 text-primary' : 'bg-accent/8 text-accent'
+                      }`}>{t.timingType}</span>
+                      <h4 className="text-xs font-medium text-foreground">{t.name}</h4>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {t.complianceStatus === 'approved' ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> :
+                       t.complianceStatus === 'pending_review' ? <Clock className="h-3.5 w-3.5 text-[hsl(var(--warning))]" /> :
+                       <XCircle className="h-3.5 w-3.5 text-destructive" />}
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground line-clamp-2">{t.content}</p>
+                  <div className="flex items-center gap-3 mt-2 text-[9px] text-muted-foreground/60">
+                    <span>渠道: {t.channels.join(' / ')}</span>
+                    <span>使用 {t.usageCount.toLocaleString()} 次</span>
+                    <span>检测点 {t.complianceCheckPoints}个</span>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {categories.map(cat => (
-              <button
-                key={cat.key}
-                onClick={() => setSelectedCategory(cat.key)}
-                className={`text-[11px] px-2 py-1 rounded-full transition-colors ${
-                  selectedCategory === cat.key
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {cat.label}
-                <span className="ml-1 text-[9px] opacity-60">{cat.count}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* 模板卡片 */}
-          <div className="space-y-2 max-h-[520px] overflow-y-auto">
-            {filteredTemplates.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setSelectedTemplate(selectedTemplate === t.id ? null : t.id)}
-                className={`w-full text-left rounded-lg border p-3 transition-all duration-200 ${
-                  selectedTemplate === t.id
-                    ? 'border-primary bg-primary/4'
-                    : 'border-border bg-card hover:border-primary/20'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-                      t.category === 'volatility_companion' ? 'bg-destructive/10 text-destructive' :
-                      t.category === 'holding_companion' ? 'bg-primary/10 text-primary' :
-                      t.category === 'marketing' ? 'bg-accent/10 text-accent' :
-                      t.category === 'risk_alert' ? 'bg-warning/10 text-[hsl(var(--warning))]' :
-                      t.category === 'compliance' ? 'bg-muted text-muted-foreground' :
-                      'bg-success/10 text-success'
-                    }`}>
-                      {t.categoryLabel}
-                    </span>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
-                      t.timingType === 'T+0' ? 'bg-success/8 text-success' :
-                      t.timingType === 'T+3' ? 'bg-primary/8 text-primary' :
-                      'bg-accent/8 text-accent'
-                    }`}>
-                      {t.timingType}
-                    </span>
-                    <h4 className="text-xs font-medium text-foreground">{t.name}</h4>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {t.complianceStatus === 'approved' ? (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-                    ) : t.complianceStatus === 'pending_review' ? (
-                      <Clock className="h-3.5 w-3.5 text-[hsl(var(--warning))]" />
-                    ) : (
-                      <XCircle className="h-3.5 w-3.5 text-destructive" />
-                    )}
+          <div>
+            {template ? (
+              <div className="rounded-lg border border-border bg-card p-3 space-y-3 sticky top-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground">{template.name}</h3>
+                  <div className="flex gap-1">
+                    <button onClick={() => setShowPreview(prev => !prev)} title="预览模板" className={`h-6 w-6 rounded flex items-center justify-center transition-colors ${showPreview ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}>
+                      <Eye className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => { navigator.clipboard.writeText(template.content); setCopied(true); setTimeout(() => setCopied(false), 1500) }} title="复制模板" className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+                      {copied ? <CheckCircle2 className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+                    </button>
                   </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground line-clamp-2">{t.content}</p>
-                <div className="flex items-center gap-3 mt-2 text-[9px] text-muted-foreground/60">
-                  <span>渠道: {t.channels.join(' / ')}</span>
-                  <span>使用 {t.usageCount.toLocaleString()} 次</span>
-                  <span>检测点 {t.complianceCheckPoints}个</span>
+                <div className={`rounded p-2.5 border transition-all ${showPreview ? 'bg-card border-primary/30 ring-1 ring-primary/10' : 'bg-secondary/50 border-border/50'}`}>
+                  {showPreview && <p className="text-[9px] text-primary font-semibold mb-1.5">模板预览模式</p>}
+                  <p className={`leading-relaxed whitespace-pre-wrap ${showPreview ? 'text-xs text-foreground' : 'text-[11px] text-foreground'}`}>
+                    {showPreview
+                      ? template.content.replace(/\{\{customerName\}\}/g, '张建国').replace(/\{\{fundName\}\}/g, '易方达蓝筹精选混合').replace(/\{\{(\w+)\}\}/g, (_, p) => `[示例${p}]`)
+                      : template.content.replace(/\{\{(\w+)\}\}/g, (_, param) => `[${param}]`)}
+                  </p>
                 </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 模板详情 */}
-        <div>
-          {template ? (
-            <div className="rounded-lg border border-border bg-card p-3 space-y-3 sticky top-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-foreground">{template.name}</h3>
-                <div className="flex gap-1">
-                  <button onClick={() => setShowPreview(prev => !prev)} title="预览模板" className={`h-6 w-6 rounded flex items-center justify-center transition-colors ${showPreview ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}>
-                    <Eye className="h-3 w-3" />
-                  </button>
-                  <button onClick={() => { navigator.clipboard.writeText(template.content); setCopied(true); setTimeout(() => setCopied(false), 1500) }} title="复制模板" className="h-6 w-6 rounded flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-                    {copied ? <CheckCircle2 className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
-                  </button>
+                <div>
+                  <h4 className="text-[10px] font-semibold text-muted-foreground mb-1.5">动态参数</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {template.dynamicParams.map(p => (
+                      <span key={p} className="text-[9px] px-1.5 py-0.5 rounded bg-primary/8 text-primary font-mono">{`{{${p}}}`}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              {/* 模板内容预览 */}
-              <div className={`rounded p-2.5 border transition-all ${showPreview ? 'bg-card border-primary/30 ring-1 ring-primary/10' : 'bg-secondary/50 border-border/50'}`}>
-                {showPreview && <p className="text-[9px] text-primary font-semibold mb-1.5">模板预览模式</p>}
-                <p className={`leading-relaxed whitespace-pre-wrap ${showPreview ? 'text-xs text-foreground' : 'text-[11px] text-foreground'}`}>
-                  {showPreview
-                    ? template.content.replace(/\{\{customerName\}\}/g, '张建国').replace(/\{\{fundName\}\}/g, '易方达蓝筹精选混合').replace(/\{\{(\w+)\}\}/g, (_, p) => `[示例${p}]`)
-                    : template.content.replace(/\{\{(\w+)\}\}/g, (_, param) => `[${param}]`)}
-                </p>
-              </div>
-
-              {/* 动态参数 */}
-              <div>
-                <h4 className="text-[10px] font-semibold text-muted-foreground mb-1.5">动态参数</h4>
-                <div className="flex flex-wrap gap-1">
-                  {template.dynamicParams.map(p => (
-                    <span key={p} className="text-[9px] px-1.5 py-0.5 rounded bg-primary/8 text-primary font-mono">
-                      {`{{${p}}}`}
-                    </span>
+                <div className="space-y-1.5 text-[11px]">
+                  {[
+                    { l: '分类', v: template.categoryLabel },
+                    { l: '时序类型', v: template.timingType === 'T+0' ? '即时触达' : template.timingType === 'T+3' ? '3日跟进' : '7日复盘' },
+                    { l: '适用渠道', v: template.channels.length + '个' },
+                    { l: '关联规则', v: template.linkedMotRules.join(', ') },
+                    { l: '合规检测点', v: template.complianceCheckPoints + '个' },
+                    { l: '使用次数', v: template.usageCount.toLocaleString() },
+                    { l: '创建时间', v: template.createdAt },
+                  ].map(item => (
+                    <div key={item.l} className="flex justify-between">
+                      <span className="text-muted-foreground">{item.l}</span>
+                      <span className="text-foreground">{item.v}</span>
+                    </div>
                   ))}
                 </div>
-              </div>
-
-              {/* 关联信息 */}
-              <div className="space-y-1.5 text-[11px]">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">分类</span>
-                  <span className="text-foreground">{template.categoryLabel}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">时序类型</span>
-                  <span className="text-foreground">{template.timingType === 'T+0' ? '即时触达' : template.timingType === 'T+3' ? '3日跟进' : '7日复盘'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">适用渠道</span>
-                  <span className="text-foreground">{template.channels.length}个</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">关联规则</span>
-                  <span className="text-foreground">{template.linkedMotRules.join(', ')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">合规检测点</span>
-                  <span className="text-foreground">{template.complianceCheckPoints}个</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">使用次数</span>
-                  <span className="text-foreground font-medium">{template.usageCount.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">创建时间</span>
-                  <span className="text-foreground">{template.createdAt}</span>
+                <div className={`flex items-center gap-2 rounded p-2 ${
+                  template.complianceStatus === 'approved' ? 'bg-success/8 border border-success/20' :
+                  template.complianceStatus === 'pending_review' ? 'bg-warning/8 border border-warning/20' :
+                  'bg-destructive/8 border border-destructive/20'
+                }`}>
+                  <Shield className={`h-3.5 w-3.5 ${
+                    template.complianceStatus === 'approved' ? 'text-success' :
+                    template.complianceStatus === 'pending_review' ? 'text-[hsl(var(--warning))]' : 'text-destructive'
+                  }`} />
+                  <span className="text-[10px] font-medium">
+                    {template.complianceStatus === 'approved' ? 'AI合规审核通过' : template.complianceStatus === 'pending_review' ? '待人工审核' : '审核未通过'}
+                  </span>
                 </div>
               </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
+                <FileText className="h-6 w-6 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">点击模板查看详情</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-1">支持T+0/T+3/T+7时序化内容</p>
+              </div>
+            )}
+            <div className="rounded-lg border border-border bg-card p-3 mt-3">
+              <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-primary" />陪伴服务模型
+              </h4>
+              <div className="space-y-2">
+                {[
+                  { label: '波动陪伴', desc: 'T+0即时安抚 → T+3跟进关怀 → T+7复盘总结', color: 'destructive' },
+                  { label: '持有陪伴', desc: '定投鼓励 → 百日纪念 → 季度复盘 → 年度回顾', color: 'primary' },
+                  { label: '生命周期', desc: '首投欢迎 → 成长引导 → 成熟维系 → 流失挽回', color: 'success' },
+                ].map(model => (
+                  <div key={model.label} className="flex items-start gap-2">
+                    <span className={`mt-0.5 h-1.5 w-1.5 rounded-full shrink-0 bg-${model.color}`} />
+                    <div>
+                      <p className="text-[10px] font-medium text-foreground">{model.label}</p>
+                      <p className="text-[9px] text-muted-foreground">{model.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* 合规状态 */}
-              <div className={`flex items-center gap-2 rounded p-2 ${
-                template.complianceStatus === 'approved' ? 'bg-success/8 border border-success/20' :
-                template.complianceStatus === 'pending_review' ? 'bg-warning/8 border border-warning/20' :
-                'bg-destructive/8 border border-destructive/20'
-              }`}>
-                <Shield className={`h-3.5 w-3.5 ${
-                  template.complianceStatus === 'approved' ? 'text-success' :
-                  template.complianceStatus === 'pending_review' ? 'text-[hsl(var(--warning))]' :
-                  'text-destructive'
-                }`} />
-                <span className="text-[10px] font-medium">
-                  {template.complianceStatus === 'approved' ? 'AI合规审核通过' :
-                   template.complianceStatus === 'pending_review' ? '待人工审核' : '审核未通过'}
+      {/* ====== 投资财富工具 Tab ====== */}
+      {subTab === 'tools' && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+              <input type="text" placeholder="搜索工具名称..." value={toolSearch} onChange={e => setToolSearch(e.target.value)}
+                className="h-7 w-full rounded border border-border bg-card pl-7 pr-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none" />
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {toolCats.map(cat => (
+                <button key={cat} onClick={() => setToolCatFilter(cat)}
+                  className={`text-[11px] px-2 py-1 rounded-full transition-colors ${
+                    toolCatFilter === cat ? 'bg-primary/10 text-primary font-medium' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                  }`}>
+                  {cat === 'all' ? '全部' : cat}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-2.5 max-h-[560px] overflow-y-auto">
+            {filteredTools.map(tool => {
+              const Icon = toolCatIcons[tool.category] || Wrench
+              return (
+                <div key={tool.id} className="rounded-lg border border-border bg-card p-3 hover:border-primary/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                      <Icon className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs font-semibold text-foreground truncate">{tool.name}</h4>
+                      <span className="text-[9px] text-muted-foreground">{tool.category}</span>
+                    </div>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{tool.desc}</p>
+                  <div className="flex items-center justify-between text-[9px] text-muted-foreground/60">
+                    <span>累计使用 {tool.usage.toLocaleString()} 次</span>
+                    <span className="text-success font-medium">已上线</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ====== 营销内容 Tab ====== */}
+      {subTab === 'contents' && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+              <input type="text" placeholder="搜索内容名称..." value={contentSearch} onChange={e => setContentSearch(e.target.value)}
+                className="h-7 w-full rounded border border-border bg-card pl-7 pr-3 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none" />
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {contentCats.map(cat => (
+                <button key={cat} onClick={() => setContentCatFilter(cat)}
+                  className={`text-[11px] px-2 py-1 rounded-full transition-colors ${
+                    contentCatFilter === cat ? 'bg-accent/10 text-accent font-medium' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                  }`}>
+                  {cat === 'all' ? '全部' : cat}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-2.5 max-h-[560px] overflow-y-auto">
+            {filteredContents.map(item => {
+              const Icon = contentCatIcons[item.category] || Layers
+              const badgeColor = fmtColors[item.format] || 'bg-secondary text-muted-foreground border-border'
+              return (
+                <div key={item.id} className="rounded-lg border border-border bg-card p-3 hover:border-accent/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
+                      <Icon className="h-3.5 w-3.5 text-accent" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs font-semibold text-foreground truncate">{item.name}</h4>
+                      <span className="text-[9px] text-muted-foreground">{item.category}</span>
+                    </div>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-medium shrink-0 ${badgeColor}`}>{item.format}</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{item.desc}</p>
+                  <div className="flex items-center justify-between text-[9px] text-muted-foreground/60">
+                    <span>累计使用 {item.usage.toLocaleString()} 次</span>
+                    <span className="text-success font-medium">已上线</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ====== AI千人千面 Tab ====== */}
+      {subTab === 'ai' && (
+        <div className="space-y-4">
+          <div className="rounded-lg border-2 border-dashed border-primary/15 bg-gradient-to-b from-primary/[0.02] to-transparent p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
+                <Brain className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-bold text-primary">AI 千人千面引擎</span>
+              </div>
+              <div className="flex items-center gap-1.5 ml-auto">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
+                <span className="text-[10px] text-emerald-600 font-medium">实时运行</span>
               </div>
             </div>
-          ) : (
-            <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
-              <FileText className="h-6 w-6 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">点击模板查看详情</p>
-              <p className="text-[10px] text-muted-foreground/60 mt-1">支持T+0/T+3/T+7时序化内容</p>
-            </div>
-          )}
+            <p className="text-[10px] text-muted-foreground mb-4">
+              基于客户360画像 × MOT触发规则 × 内容库 × 工具库，AI自动为每位客户组装最优触达方案。以下为近期AI生成的个性化推荐示例：
+            </p>
 
-          {/* 陪伴服务模型说明 */}
-          <div className="rounded-lg border border-border bg-card p-3 mt-3">
-            <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-primary" />
-              陪伴服务模型
-            </h4>
-            <div className="space-y-2">
-              {[
-                { label: '波动陪伴', desc: 'T+0即时安抚 → T+3跟进关怀 → T+7复盘总结', color: 'destructive' },
-                { label: '持有陪伴', desc: '定投鼓励 → 百日纪念 → 季度复盘 → 年度回顾', color: 'primary' },
-                { label: '生命周期', desc: '首投欢迎 → 成长引导 → 成熟维系 → 流失挽回', color: 'success' },
-              ].map(model => (
-                <div key={model.label} className="flex items-start gap-2">
-                  <span className={`mt-0.5 h-1.5 w-1.5 rounded-full shrink-0 bg-${model.color}`} />
-                  <div>
-                    <p className="text-[10px] font-medium text-foreground">{model.label}</p>
-                    <p className="text-[9px] text-muted-foreground">{model.desc}</p>
+            <div className="space-y-3">
+              {aiPersonalizedExamples.map((example, idx) => (
+                <div key={idx} className="rounded-lg border border-border bg-card p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/12 text-xs font-bold text-primary">{example.customer[0]}</div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-semibold text-foreground">{example.customer}</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{example.type}</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">触发规则：{example.trigger}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-primary" />
+                      <span className="text-[10px] text-primary font-medium">AI生成</span>
+                    </div>
+                  </div>
+
+                  {/* 推荐项目 */}
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-2 mb-3">
+                    {example.items.map((item, i) => {
+                      if (item.kind === 'tool') {
+                        const TIcon = toolCatIcons[item.cat!] || Wrench
+                        return (
+                          <div key={i} className="rounded bg-primary/[0.03] border border-primary/10 p-2">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <TIcon className="h-3 w-3 text-primary" />
+                              <span className="text-[9px] text-primary font-medium">工具</span>
+                            </div>
+                            <p className="text-[10px] font-medium text-foreground leading-tight">{item.name}</p>
+                            <p className="text-[9px] text-muted-foreground mt-0.5">{item.cat}</p>
+                          </div>
+                        )
+                      }
+                      if (item.kind === 'content') {
+                        const CIcon = contentCatIcons[item.cat!] || Layers
+                        const bColor = fmtColors[item.format || ''] || 'bg-secondary text-muted-foreground border-border'
+                        return (
+                          <div key={i} className="rounded bg-accent/[0.03] border border-accent/10 p-2">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <CIcon className="h-3 w-3 text-accent" />
+                              <span className="text-[9px] text-accent font-medium">内容</span>
+                              {item.format && <span className={`text-[8px] px-1 py-0 rounded-full border ${bColor}`}>{item.format}</span>}
+                            </div>
+                            <p className="text-[10px] font-medium text-foreground leading-tight">{item.name}</p>
+                            <p className="text-[9px] text-muted-foreground mt-0.5">{item.cat}</p>
+                          </div>
+                        )
+                      }
+                      // message
+                      return (
+                        <div key={i} className="rounded bg-success/[0.03] border border-success/10 p-2">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <MessageSquare className="h-3 w-3 text-success" />
+                            <span className="text-[9px] text-success font-medium">话术</span>
+                          </div>
+                          <p className="text-[10px] font-medium text-foreground leading-tight">{item.name}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* AI 推荐理由 */}
+                  <div className="rounded bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 px-2.5 py-2">
+                    <p className="text-[10px] text-primary font-bold flex items-center gap-1 mb-0.5">
+                      <Sparkles className="h-3 w-3" /> AI推荐理由
+                    </p>
+                    <p className="text-[10px] text-foreground/70 leading-relaxed">{example.reasoning}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
