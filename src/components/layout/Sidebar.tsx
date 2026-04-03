@@ -41,7 +41,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/', label: 'MOT总览', icon: LayoutDashboard },
-  { path: '/customers', label: '客户360', icon: Users },
+  { path: '/customers', label: '客户画像', icon: Users },
   {
     path: '/strategy-center',
     label: '策略中心',
@@ -311,6 +311,8 @@ export default function Sidebar() {
 /* ========== 顶栏 ========== */
 export function TopBar() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const isPanorama = location.pathname.includes('/panorama')
   const { user, logout } = useAuth()
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains('dark')
@@ -362,6 +364,7 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-30 flex h-10 items-center justify-between border-b border-border bg-card px-4">
       <div className="flex items-center gap-2">
+        {!isPanorama && (
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -386,6 +389,7 @@ export function TopBar() {
             </div>
           )}
         </div>
+        )}
       </div>
       <div className="flex items-center gap-1.5">
         <div className="flex items-center gap-1 rounded bg-success/8 px-2 py-0.5 mr-1.5">

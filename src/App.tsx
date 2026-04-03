@@ -10,6 +10,7 @@ import ChannelCenter from '@/pages/ChannelCenter'
 import StrategyMining from '@/pages/StrategyMining'
 import SystemSettings from '@/pages/SystemSettings'
 import PresentationPage from '@/presentation/PresentationPage'
+import CustomerPanoramaPage from '@/features/customer-panorama'
 
 function RequireAuth() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -29,6 +30,7 @@ function App() {
               <Route element={<AppLayout />}>
                 <Route path="/" element={<MOTOverview />} />
                 <Route path="/customers" element={<CustomersPage />} />
+                <Route path="/customers/:customerId/panorama" element={<CustomerPanoramaPage />} />
                 <Route path="/strategy-center" element={<StrategyCenter />} />
                 <Route path="/channel-center" element={<ChannelCenter />} />
                 <Route path="/strategy-mining/*" element={<StrategyMining />} />

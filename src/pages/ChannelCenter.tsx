@@ -74,42 +74,147 @@ export default function ChannelCenter() {
   )
 }
 
-// ===== Tab 1: 渠道管理 =====
+// ===== 触点位置数据 =====
+const touchpointPositions: {
+  channelId: string
+  positions: { name: string; location: string; type: string; status: 'active' | 'testing' | 'inactive'; dailyExposure: number; clickRate: number; desc: string }[]
+}[] = [
+  {
+    channelId: 'CH001',
+    positions: [
+      { name: '首页Banner位', location: 'APP > 首页 > 顶部Banner轮播', type: '图文展示', status: 'active', dailyExposure: 128000, clickRate: 4.2, desc: '首页顶部轮播Banner，最多5张，支持深度链接跳转至基金详情/活动页' },
+      { name: '消息中心通知卡片', location: 'APP > 消息中心 > 通知列表', type: '通知消息', status: 'active', dailyExposure: 89000, clickRate: 12.5, desc: '消息中心内的通知卡片，支持富文本和操作按钮' },
+      { name: '全屏弹窗推送', location: 'APP > 启动/切换 > 全屏弹窗', type: '弹窗', status: 'active', dailyExposure: 45000, clickRate: 8.3, desc: '用户启动APP或从后台切换时触发的全屏弹窗，每日最多1次' },
+      { name: '基金详情页推荐位', location: 'APP > 基金详情 > 底部推荐区', type: '信息流', status: 'active', dailyExposure: 36000, clickRate: 6.8, desc: '基金详情页底部的相关产品推荐位，根据用户持仓智能推荐' },
+      { name: '持仓页浮层提示', location: 'APP > 持仓 > 智能浮层气泡', type: '浮层提示', status: 'active', dailyExposure: 52000, clickRate: 15.2, desc: '持仓页面的智能浮层提示，如波动预警、定投提醒、收益里程碑' },
+      { name: '首页信息流卡片', location: 'APP > 首页 > 信息流区域', type: '信息流', status: 'active', dailyExposure: 96000, clickRate: 3.5, desc: '首页下滑信息流中的推荐内容卡片，AI个性化排序' },
+      { name: '理财频道顶部推荐', location: 'APP > 理财频道 > 顶部卡片', type: '卡片展示', status: 'active', dailyExposure: 68000, clickRate: 5.8, desc: '理财频道顶部的精选推荐卡片，展示热门产品和策略' },
+    ],
+  },
+  {
+    channelId: 'CH002',
+    positions: [
+      { name: '标准营销短信', location: '短信 > 营销通道 > 70字文本', type: '文本消息', status: 'active', dailyExposure: 24800, clickRate: 2.1, desc: '70字以内营销短信，含退订提示，走营销通道' },
+      { name: '通知类短信', location: '短信 > 通知通道 > 服务提醒', type: '通知消息', status: 'active', dailyExposure: 15600, clickRate: 5.6, desc: '交易提醒、净值变动、分红到账等服务通知类短信' },
+      { name: '带短链短信', location: '短信 > 营销通道 > 含短链', type: '文本+链接', status: 'active', dailyExposure: 8900, clickRate: 7.8, desc: '含短链接的短信，可跳转H5落地页或APP深度链接' },
+    ],
+  },
+  {
+    channelId: 'CH003',
+    positions: [
+      { name: '图文卡片消息', location: '5G消息 > 图文卡片 > 原生入口', type: '富媒体', status: 'active', dailyExposure: 5200, clickRate: 18.5, desc: '支持图片+文字+按钮的富媒体卡片，短信入口原生展示' },
+      { name: '视频消息卡片', location: '5G消息 > 视频卡片 > 内嵌播放', type: '视频', status: 'active', dailyExposure: 2100, clickRate: 22.3, desc: '支持内嵌视频播放的消息卡片，适合行情解读和投教' },
+      { name: '轮播图消息', location: '5G消息 > 轮播卡片 > 多图展示', type: '富媒体', status: 'testing', dailyExposure: 800, clickRate: 15.6, desc: '左右滑动的轮播图消息，适合多产品组合展示' },
+      { name: '菜单交互消息', location: '5G消息 > 菜单卡片 > 快捷操作', type: '交互', status: 'active', dailyExposure: 1500, clickRate: 25.1, desc: '带操作菜单的交互式消息，支持一键跳转申购/赎回' },
+    ],
+  },
+  {
+    channelId: 'CH004',
+    positions: [
+      { name: '链接解析卡片', location: 'AIM > 链接增强 > 自动解析', type: '增强展示', status: 'active', dailyExposure: 8500, clickRate: 14.2, desc: '短信中链接自动解析为带图卡片，提升点击率3-5倍' },
+      { name: '品牌LOGO展示', location: 'AIM > 品牌增强 > 头部LOGO', type: '品牌展示', status: 'active', dailyExposure: 12300, clickRate: 8.7, desc: '短信头部展示易方达品牌LOGO+公司名称，增强信任度' },
+      { name: '底部快捷菜单', location: 'AIM > 底部菜单 > 快捷入口', type: '交互', status: 'active', dailyExposure: 6800, clickRate: 11.5, desc: '短信底部增加"查看详情/立即申购/联系客服"快捷菜单' },
+    ],
+  },
+  {
+    channelId: 'CH005',
+    positions: [
+      { name: 'HTML营销邮件', location: '邮件 > 营销模板 > 富文本排版', type: '富文本', status: 'active', dailyExposure: 6800, clickRate: 4.5, desc: 'HTML格式营销邮件，支持复杂排版、嵌入图表和CTA按钮' },
+      { name: '研报附件邮件', location: '邮件 > 研报推送 > PDF附件', type: '附件', status: 'active', dailyExposure: 2100, clickRate: 28.6, desc: '含PDF研报附件的邮件，适合深度内容分发给专家型客户' },
+      { name: '周报/月报摘要', location: '邮件 > 定期报告 > 自动生成', type: '定期推送', status: 'active', dailyExposure: 4500, clickRate: 18.3, desc: '定期发送的持仓报告、市场周报摘要邮件，含可视化图表' },
+      { name: '纯文本通知邮件', location: '邮件 > 服务通知 > 纯文本', type: '纯文本', status: 'active', dailyExposure: 1800, clickRate: 6.2, desc: '简洁的纯文本格式服务通知邮件，如账户变动、密码修改' },
+    ],
+  },
+  {
+    channelId: 'CH006',
+    positions: [
+      { name: '1V1私聊消息', location: '企微 > 私聊 > 文本/图文消息', type: '即时消息', status: 'active', dailyExposure: 3200, clickRate: 45.8, desc: '专属客服1对1私聊消息，支持文本、图片、视频、小程序' },
+      { name: '会话卡片消息', location: '企微 > 私聊 > 结构化卡片', type: '卡片消息', status: 'active', dailyExposure: 1800, clickRate: 38.2, desc: '企微会话中的结构化卡片消息，带标题摘要和操作按钮' },
+      { name: '客户朋友圈', location: '企微 > 客户朋友圈 > 动态发布', type: '朋友圈', status: 'active', dailyExposure: 5600, clickRate: 8.5, desc: '客服人员发布的企微朋友圈内容，如市场观点、产品推荐' },
+      { name: '客户群群发', location: '企微 > 客户群 > 群消息推送', type: '群消息', status: 'active', dailyExposure: 2800, clickRate: 12.3, desc: '投资者交流群内的群发消息，适合盘后复盘和热点解读' },
+      { name: '易服务小程序卡片', location: '企微 > 私聊 > 小程序分享', type: '小程序', status: 'active', dailyExposure: 1500, clickRate: 32.6, desc: '分享易服务小程序页面给客户，一键进入定投/持仓/工具' },
+      { name: '易服务小程序首页Banner', location: '易服务小程序 > 首页 > Banner位', type: '图文展示', status: 'active', dailyExposure: 35000, clickRate: 6.8, desc: '易服务小程序首页顶部Banner轮播，承载营销活动和产品推荐' },
+      { name: '易服务小程序服务入口', location: '易服务小程序 > 服务页 > 功能入口', type: '常驻入口', status: 'active', dailyExposure: 28000, clickRate: 9.2, desc: '易服务小程序服务页的工具/计算器/诊断等功能入口位' },
+      { name: '易服务小程序弹窗', location: '易服务小程序 > 访问时 > 弹窗提醒', type: '弹窗', status: 'active', dailyExposure: 12000, clickRate: 11.5, desc: '用户访问易服务小程序时的个性化弹窗推荐，千人千面' },
+    ],
+  },
+  {
+    channelId: 'CH007',
+    positions: [
+      { name: '15秒竖版短视频', location: '视频短信 > 竖版15s > 行情快讯', type: '短视频', status: 'active', dailyExposure: 1800, clickRate: 35.2, desc: '15秒竖版短视频消息，适合行情快讯和产品一句话介绍' },
+      { name: '30秒横版视频', location: '视频短信 > 横版30s > 深度解读', type: '视频', status: 'active', dailyExposure: 900, clickRate: 28.6, desc: '30秒横版视频消息，适合基金经理观点和深度市场解读' },
+      { name: '图文视频混排', location: '视频短信 > 混排消息 > 图文+视频', type: '混合媒体', status: 'testing', dailyExposure: 500, clickRate: 42.1, desc: '图片+视频+文字混合排版消息，信息密度最高' },
+    ],
+  },
+  {
+    channelId: 'CH008',
+    positions: [
+      { name: 'AI智能外呼', location: '电话 > IVR机器人 > 自动外呼', type: 'AI外呼', status: 'active', dailyExposure: 600, clickRate: 62.5, desc: 'AI语音机器人外呼，适合标准化场景如回访确认和满意度调查' },
+      { name: '人工专属外呼', location: '电话 > 客服坐席 > 1V1外呼', type: '人工外呼', status: 'active', dailyExposure: 400, clickRate: 78.3, desc: '专属客服人工外呼，适合VIP客户和高价值场景如大额挽回' },
+      { name: '预约回访电话', location: '电话 > 预约系统 > 定时回访', type: '预约外呼', status: 'active', dailyExposure: 200, clickRate: 85.6, desc: '客户预约时段的定时回访电话，接通率最高可达85%以上' },
+    ],
+  },
+  {
+    channelId: 'CH009',
+    positions: [
+      { name: '服务号模板消息', location: '公众号 > 模板消息 > 一对一推送', type: '模板消息', status: 'active', dailyExposure: 8500, clickRate: 12.8, desc: '微信服务号模板消息推送，到达率高，支持跳转小程序/H5' },
+      { name: '图文推送(头条位)', location: '公众号 > 群发图文 > 头条', type: '图文', status: 'active', dailyExposure: 16500, clickRate: 8.5, desc: '公众号群发消息头条位，阅读量最高，适合重点内容推送' },
+      { name: '图文推送(次条位)', location: '公众号 > 群发图文 > 次条', type: '图文', status: 'active', dailyExposure: 16500, clickRate: 3.2, desc: '公众号群发消息次条位，适合补充内容和常规投教' },
+      { name: '菜单栏常驻入口', location: '公众号 > 底部菜单 > 固定入口', type: '常驻入口', status: 'active', dailyExposure: 25000, clickRate: 2.1, desc: '公众号底部菜单栏的固定入口，如"我的账户""在线客服"' },
+      { name: '关注自动回复', location: '公众号 > 新关注 > 欢迎消息', type: '自动回复', status: 'active', dailyExposure: 1200, clickRate: 35.4, desc: '新关注用户自动回复消息，含新手引导和专属福利领取' },
+    ],
+  },
+]
+
+const _allPositions = touchpointPositions.flatMap(t => t.positions)
+const _totalPositionCount = _allPositions.length
+const _totalDailyExposure = _allPositions.reduce((s, p) => s + p.dailyExposure, 0)
+const _avgPositionClickRate = (_allPositions.reduce((s, p) => s + p.clickRate, 0) / _totalPositionCount).toFixed(1)
+
+// ===== Tab 1: 触点管理 =====
 function ChannelManagementTab() {
-  const [selectedChannel, setSelectedChannel] = useState<string | null>(null)
+  const [expandedChannel, setExpandedChannel] = useState<string | null>('CH001')
+  const [selectedPosition, setSelectedPosition] = useState<{ channelId: string; posIdx: number } | null>(null)
   const [showRouting, setShowRouting] = useState(false)
 
-  const channel = selectedChannel ? deliveryChannels.find(c => c.id === selectedChannel) : null
-
-  // 汇总统计
-  const totalVolume = deliveryChannels.reduce((s, c) => s + c.dailyVolume, 0)
-  const avgDeliveryRate = (deliveryChannels.reduce((s, c) => s + c.deliveryRate, 0) / deliveryChannels.length).toFixed(1)
-  const avgOpenRate = (deliveryChannels.reduce((s, c) => s + c.openRate, 0) / deliveryChannels.length).toFixed(1)
-  const avgConversion = (deliveryChannels.reduce((s, c) => s + c.conversionRate, 0) / deliveryChannels.length).toFixed(1)
+  const selectedPos = selectedPosition
+    ? touchpointPositions.find(t => t.channelId === selectedPosition.channelId)?.positions[selectedPosition.posIdx]
+    : null
+  const selectedChannelInfo = selectedPosition
+    ? deliveryChannels.find(c => c.id === selectedPosition.channelId)
+    : null
 
   return (
     <div className="space-y-4">
       {/* KPI */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {[
-          { label: '日均发送量', value: (totalVolume / 10000).toFixed(1) + '万', sub: '9个渠道合计', color: 'primary' },
-          { label: '平均送达率', value: avgDeliveryRate + '%', sub: '全渠道均值', color: 'success' },
-          { label: '平均打开率', value: avgOpenRate + '%', sub: '含APP/邮件/短信', color: 'accent' },
-          { label: '平均转化率', value: avgConversion + '%', sub: '行为转化口径', color: 'gold' },
+          { label: '触点渠道', value: deliveryChannels.length + '个', sub: '全部在线运行中', color: 'primary' },
+          { label: '触达位置', value: _totalPositionCount + '个', sub: '覆盖全渠道具体位置', color: 'success' },
+          { label: '日均总曝光', value: (_totalDailyExposure / 10000).toFixed(1) + '万', sub: '全触点合计', color: 'accent' },
+          { label: '平均点击率', value: _avgPositionClickRate + '%', sub: '全触达位置均值', color: 'gold' },
         ].map(kpi => (
           <div key={kpi.label} className="rounded-lg border border-border bg-card p-3">
             <p className="text-[10px] text-muted-foreground">{kpi.label}</p>
-            <p className={`text-xl font-bold mt-0.5 text-${kpi.color === 'primary' ? 'primary' : kpi.color === 'gold' ? '[hsl(var(--gold))]' : kpi.color === 'accent' ? 'accent' : 'success'}`}>{kpi.value}</p>
+            <p className={`text-xl font-bold mt-0.5 ${
+              kpi.color === 'primary' ? 'text-primary' :
+              kpi.color === 'success' ? 'text-success' :
+              kpi.color === 'accent' ? 'text-accent' :
+              'text-[hsl(var(--gold))]'
+            }`}>{kpi.value}</p>
             <p className="text-[10px] text-muted-foreground/60 mt-0.5">{kpi.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        {/* 渠道列表 */}
+        {/* 触点列表 */}
         <div className="col-span-2 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground">通信渠道矩阵</h3>
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-primary" />
+              触点矩阵 · 触达位置
+            </h3>
             <button
               onClick={() => setShowRouting(!showRouting)}
               className="text-[11px] text-primary hover:underline flex items-center gap-1"
@@ -152,101 +257,134 @@ function ChannelManagementTab() {
             </div>
           )}
 
-          {/* 渠道网格 */}
-          <div className="grid grid-cols-3 gap-2">
+          {/* 触点可展开列表 */}
+          <div className="space-y-2 max-h-[560px] overflow-y-auto">
             {deliveryChannels.map(ch => {
               const Icon = iconMap[ch.icon] || Smartphone
-              const isSelected = selectedChannel === ch.id
+              const isExpanded = expandedChannel === ch.id
+              const tpData = touchpointPositions.find(t => t.channelId === ch.id)
+              const positions = tpData?.positions || []
+
               return (
-                <button
-                  key={ch.id}
-                  onClick={() => setSelectedChannel(isSelected ? null : ch.id)}
-                  className={`text-left rounded-lg border p-3 transition-all duration-200 ${
-                    isSelected
-                      ? 'border-primary bg-primary/4 shadow-sm'
-                      : 'border-border bg-card hover:border-primary/30 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <div className={`h-7 w-7 rounded flex items-center justify-center ${
-                        isSelected ? 'bg-primary/12' : 'bg-secondary'
-                      }`}>
-                        <Icon className={`h-3.5 w-3.5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                <div key={ch.id} className={`rounded-lg border transition-all duration-200 ${
+                  isExpanded ? 'border-primary/30 bg-primary/[0.02]' : 'border-border bg-card'
+                }`}>
+                  <button
+                    onClick={() => setExpandedChannel(isExpanded ? null : ch.id)}
+                    className="w-full text-left p-3 flex items-center gap-3"
+                  >
+                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      isExpanded ? 'bg-primary/12' : 'bg-secondary'
+                    }`}>
+                      <Icon className={`h-4 w-4 ${isExpanded ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-foreground">{ch.name}</span>
+                        <span className="text-[9px] text-muted-foreground">{ch.typeLabel}</span>
+                        <span className={`h-1.5 w-1.5 rounded-full ${ch.status === 'online' ? 'bg-success' : 'bg-warning'}`} />
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold text-foreground">{ch.name}</p>
-                        <p className="text-[9px] text-muted-foreground">{ch.typeLabel}</p>
+                      <div className="flex items-center gap-3 text-[9px] text-muted-foreground mt-0.5">
+                        <span>送达{ch.deliveryRate}%</span>
+                        <span>打开{ch.openRate}%</span>
+                        <span>转化{ch.conversionRate}%</span>
+                        <span>日均{(ch.dailyVolume / 1000).toFixed(1)}k</span>
                       </div>
                     </div>
-                    <span className={`h-2 w-2 rounded-full ${
-                      ch.status === 'online' ? 'bg-success' : ch.status === 'maintenance' ? 'bg-warning' : 'bg-destructive'
-                    }`} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">送达率</p>
-                      <p className="text-xs font-semibold text-foreground">{ch.deliveryRate}%</p>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-medium text-primary bg-primary/8 px-2 py-0.5 rounded-full">
+                        {positions.length}个位置
+                      </span>
+                      {isExpanded
+                        ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
+                        : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
                     </div>
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">打开率</p>
-                      <p className="text-xs font-semibold text-foreground">{ch.openRate}%</p>
+                  </button>
+
+                  {isExpanded && positions.length > 0 && (
+                    <div className="px-3 pb-3 border-t border-border/50">
+                      <div className="pt-2 space-y-1.5">
+                        {positions.map((pos, idx) => {
+                          const isSelected = selectedPosition?.channelId === ch.id && selectedPosition?.posIdx === idx
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => setSelectedPosition(isSelected ? null : { channelId: ch.id, posIdx: idx })}
+                              className={`w-full text-left rounded-md p-2.5 transition-all ${
+                                isSelected
+                                  ? 'bg-primary/8 border border-primary/25 shadow-sm'
+                                  : 'bg-card border border-border/50 hover:border-primary/20 hover:bg-primary/[0.02]'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <MapPin className={`h-3 w-3 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                                  <span className="text-[11px] font-medium text-foreground">{pos.name}</span>
+                                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                                    pos.status === 'active' ? 'bg-success/10 text-success' :
+                                    pos.status === 'testing' ? 'bg-warning/10 text-[hsl(var(--warning))]' :
+                                    'bg-muted text-muted-foreground'
+                                  }`}>{pos.status === 'active' ? '已上线' : pos.status === 'testing' ? '测试中' : '未启用'}</span>
+                                </div>
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground shrink-0">{pos.type}</span>
+                              </div>
+                              <p className="text-[9px] text-muted-foreground/70 ml-5 mb-1">{pos.location}</p>
+                              <div className="flex items-center gap-4 ml-5 text-[9px] text-muted-foreground/60">
+                                <span>日均曝光 {pos.dailyExposure >= 10000 ? (pos.dailyExposure / 10000).toFixed(1) + '万' : (pos.dailyExposure / 1000).toFixed(1) + 'k'}</span>
+                                <span>点击率 <span className={pos.clickRate > 20 ? 'text-success font-medium' : ''}>{pos.clickRate}%</span></span>
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">转化率</p>
-                      <p className="text-xs font-semibold text-primary">{ch.conversionRate}%</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">日均量</p>
-                      <p className="text-xs font-semibold text-foreground">{(ch.dailyVolume / 1000).toFixed(1)}k</p>
-                    </div>
-                  </div>
-                </button>
+                  )}
+                </div>
               )
             })}
           </div>
         </div>
 
-        {/* 右侧面板 */}
+        {/* 右侧详情面板 */}
         <div className="space-y-3">
-          {channel ? (
+          {selectedPos && selectedChannelInfo ? (
             <div className="rounded-lg border border-border bg-card p-3 space-y-3">
               <div className="flex items-center gap-2">
-                {(() => { const Icon = iconMap[channel.icon] || Smartphone; return <Icon className="h-4 w-4 text-primary" /> })()}
-                <h3 className="text-sm font-semibold text-foreground">{channel.name}</h3>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
-                  channel.status === 'online' ? 'bg-success/10 text-success' : 'bg-warning/10 text-[hsl(var(--warning))]'
-                }`}>{channel.status === 'online' ? '在线' : '维护中'}</span>
+                <MapPin className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">{selectedPos.name}</h3>
               </div>
-              <p className="text-[11px] text-muted-foreground">{channel.description}</p>
+              <div className="flex items-center gap-1.5 text-[10px]">
+                {(() => { const Icon = iconMap[selectedChannelInfo.icon] || Smartphone; return <Icon className="h-3 w-3 text-muted-foreground" /> })()}
+                <span className="text-muted-foreground">{selectedChannelInfo.name}</span>
+                <ChevronRight className="h-3 w-3 text-muted-foreground/50" />
+                <span className="text-primary font-medium">{selectedPos.name}</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">{selectedPos.desc}</p>
+
               <div className="space-y-2">
                 {[
-                  { l: '路由优先级', v: `#${channel.routingPriority}` },
-                  { l: '单条成本', v: `¥${channel.costPerMessage}` },
-                  { l: '日限额', v: channel.dailyLimit.toLocaleString() + '条' },
-                  { l: '适用客群', v: channel.applicableSegments.join('、') },
-                  { l: '最佳时段', v: channel.bestTimeSlots.join('、') },
+                  { l: '完整路径', v: selectedPos.location },
+                  { l: '展示类型', v: selectedPos.type },
+                  { l: '启用状态', v: selectedPos.status === 'active' ? '已上线' : selectedPos.status === 'testing' ? '测试中' : '未启用' },
+                  { l: '日均曝光', v: selectedPos.dailyExposure.toLocaleString() + '次' },
+                  { l: '平均点击率', v: selectedPos.clickRate + '%' },
+                  { l: '渠道送达率', v: selectedChannelInfo.deliveryRate + '%' },
+                  { l: '渠道转化率', v: selectedChannelInfo.conversionRate + '%' },
+                  { l: '路由优先级', v: '#' + selectedChannelInfo.routingPriority },
+                  { l: '单条成本', v: '¥' + selectedChannelInfo.costPerMessage },
                 ].map(item => (
                   <div key={item.l} className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">{item.l}</span>
                     <span className="text-foreground font-medium">{item.v}</span>
                   </div>
                 ))}
-                {channel.fallbackChannelId && (
-                  <div className="flex items-center gap-1.5 mt-1 p-1.5 rounded bg-primary/4 border border-primary/10">
-                    <ArrowRight className="h-3 w-3 text-primary shrink-0" />
-                    <span className="text-[10px] text-primary">
-                      降级渠道：{deliveryChannels.find(c => c.id === channel.fallbackChannelId)?.name}
-                    </span>
-                  </div>
-                )}
               </div>
-              {/* 效果指标条 */}
+
               <div className="space-y-1.5 mt-2">
                 {[
-                  { label: '送达率', value: channel.deliveryRate, color: 'bg-success' },
-                  { label: '打开率', value: channel.openRate, color: 'bg-primary' },
-                  { label: '转化率', value: channel.conversionRate, color: 'bg-accent' },
+                  { label: '点击率', value: selectedPos.clickRate, color: 'bg-primary' },
+                  { label: '渠道送达率', value: selectedChannelInfo.deliveryRate, color: 'bg-success' },
+                  { label: '渠道转化率', value: selectedChannelInfo.conversionRate, color: 'bg-accent' },
                 ].map(bar => (
                   <div key={bar.label}>
                     <div className="flex justify-between text-[10px] mb-0.5">
@@ -254,16 +392,26 @@ function ChannelManagementTab() {
                       <span className="font-medium text-foreground">{bar.value}%</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div className={`h-full rounded-full ${bar.color} transition-all duration-500`} style={{ width: `${bar.value}%` }} />
+                      <div className={`h-full rounded-full ${bar.color} transition-all duration-500`} style={{ width: `${Math.min(bar.value, 100)}%` }} />
                     </div>
                   </div>
                 ))}
               </div>
+
+              {selectedChannelInfo.fallbackChannelId && (
+                <div className="flex items-center gap-1.5 p-1.5 rounded bg-primary/4 border border-primary/10">
+                  <ArrowRight className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-[10px] text-primary">
+                    降级渠道：{deliveryChannels.find(c => c.id === selectedChannelInfo.fallbackChannelId)?.name}
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center">
-              <Send className="h-6 w-6 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">点击左侧渠道卡片查看详情</p>
+              <MapPin className="h-6 w-6 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">点击左侧触达位置查看详情</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-1">覆盖{deliveryChannels.length}大渠道 × {_totalPositionCount}个触达位置</p>
             </div>
           )}
 

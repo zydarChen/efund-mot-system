@@ -1,0 +1,60 @@
+/* 客户全景专属样式 */
+
+/* 数字等宽字体 */
+.font-mono-num {
+  font-family: 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 状态徽章颜色 */
+.badge-success {
+  @apply bg-emerald-100 text-emerald-700 border-emerald-300;
+}
+
+.badge-warning {
+  @apply bg-amber-100 text-amber-700 border-amber-300;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-700 border-red-300;
+}
+
+.badge-info {
+  @apply bg-blue-100 text-blue-700 border-blue-300;
+}
+
+/* Card hover effect */
+.panorama-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.panorama-card-hover:hover {
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: 0 4px 16px -4px hsl(var(--primary) / 0.12);
+  transform: translateY(-1px);
+}
+
+/* Radix ScrollArea 滚动条 */
+[data-radix-scroll-area-viewport]::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 3px;
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Recharts tooltip */
+.recharts-tooltip-wrapper {
+  z-index: 1000 !important;
+}

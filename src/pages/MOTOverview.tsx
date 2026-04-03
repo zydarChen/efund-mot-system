@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -641,12 +641,6 @@ export default function MOTOverview() {
       </div>
 
       {/* Kanban Board */}
-      <style>{`
-        @keyframes kanbanScrollUp {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(-50%); }
-        }
-      `}</style>
       <div className="grid grid-cols-3 gap-5">
         {columnConfig.map((col) => {
           const groups = getColumnGroups(col.key)
@@ -675,23 +669,19 @@ export default function MOTOverview() {
                   style={{ width: `${totalTasks > 0 ? (taskCount / totalTasks) * 100 : 0}%` }}
                 />
               </div>
-              <div
-                className="relative overflow-hidden"
-                style={shouldScroll ? { height: 520 } : undefined}
-              >
-                <div
-                  className={`space-y-2.5 ${!shouldScroll ? 'min-h-[200px]' : ''}`}
-                  style={shouldScroll ? {
-                    animation: `kanbanScrollUp ${groups.length * 3}s linear infinite`,
-                    willChange: 'transform',
-                  } : undefined}
-                  onMouseEnter={(e) => {
-                    if (shouldScroll) e.currentTarget.style.animationPlayState = 'paused'
+              {shouldScroll ? (
+                <KanbanAutoScrollColumn
+                  groups={groups}
+                  onGroupClick={(group) => {
+                    if (group.isIndividual) {
+                      setSelectedTask(group.tasks[0])
+                    } else {
+                      setSelectedGroup(group)
+                    }
                   }}
-                  onMouseLeave={(e) => {
-                    if (shouldScroll) e.currentTarget.style.animationPlayState = 'running'
-                  }}
-                >
+                />
+              ) : (
+                <div className="space-y-2.5 min-h-[200px]">
                   {groups.map((group) => (
                     <GroupCard
                       key={group.groupKey}
@@ -705,24 +695,8 @@ export default function MOTOverview() {
                       }}
                     />
                   ))}
-                  {shouldScroll && groups.map((group) => (
-                    <GroupCard
-                      key={`dup-${group.groupKey}`}
-                      group={group}
-                      onClick={() => {
-                        if (group.isIndividual) {
-                          setSelectedTask(group.tasks[0])
-                        } else {
-                          setSelectedGroup(group)
-                        }
-                      }}
-                    />
-                  ))}
                 </div>
-                {shouldScroll && (
-                  <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
-                )}
-              </div>
+              )}
             </div>
           )
         })}
@@ -736,6 +710,75 @@ export default function MOTOverview() {
         <AIServiceBrainModal task={selectedTask} onClose={() => setSelectedTask(null)} showToast={showToast} />
       )}
       <ToastContainer toasts={toasts} dismiss={dismiss} />
+    </div>
+  )
+}
+
+/* ========== 看板自动滚动列 ========== */
+
+function KanbanAutoScrollColumn({ groups, onGroupClick }: { groups: TaskGroup[]; onGroupClick: (g: TaskGroup) => void }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const isHovered = useRef(false)
+  const rafId = useRef<number>(0)
+  const speed = 0.5 // px per frame
+
+  const autoScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (el && !isHovered.current) {
+      el.scrollTop += speed
+      // 当滚动到重复内容的起始位置时，无缝回到顶部
+      const halfHeight = el.scrollHeight / 2
+      if (halfHeight > 0 && el.scrollTop >= halfHeight) {
+        el.scrollTop -= halfHeight
+      }
+    }
+    rafId.current = requestAnimationFrame(autoScroll)
+  }, [])
+
+  useEffect(() => {
+    rafId.current = requestAnimationFrame(autoScroll)
+    return () => cancelAnimationFrame(rafId.current)
+  }, [autoScroll])
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollTop += e.deltaY
+    // 无缝循环
+    const halfHeight = el.scrollHeight / 2
+    if (halfHeight > 0) {
+      if (el.scrollTop >= halfHeight) {
+        el.scrollTop -= halfHeight
+      } else if (el.scrollTop <= 0) {
+        el.scrollTop += halfHeight
+      }
+    }
+  }, [])
+
+  return (
+    <div className="relative" style={{ height: 520 }}>
+      <div
+        ref={scrollRef}
+        style={{ height: '100%', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
+        className="[&::-webkit-scrollbar]:hidden"
+        onMouseEnter={() => { isHovered.current = true }}
+        onMouseLeave={() => { isHovered.current = false }}
+        onWheel={handleWheel}
+      >
+        <div className="space-y-2.5">
+          {groups.map((group) => (
+            <GroupCard key={group.groupKey} group={group} onClick={() => onGroupClick(group)} />
+          ))}
+          {/* 重复一份内容实现无缝循环 */}
+          {groups.map((group) => (
+            <GroupCard key={`dup-${group.groupKey}`} group={group} onClick={() => onGroupClick(group)} />
+          ))}
+        </div>
+      </div>
+      <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
     </div>
   )
 }

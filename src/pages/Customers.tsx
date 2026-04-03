@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,7 @@ import {
   BarChart3,
   Clock,
   Eye,
+  Shield,
 } from 'lucide-react'
 import {
   PieChart,
@@ -139,28 +141,316 @@ function ProgressBar({ value, max = 100, color = 'bg-primary' }: { value: number
   )
 }
 
-// ===== 客户列表 =====
-function CustomerList({ customers: custs, onSelect }: { customers: Customer[]; onSelect: (c: Customer) => void }) {
+// ===== 分组维度配置 =====
+type DimensionKey = 'customerType' | 'lifecycleStage' | 'riskLevel'
+
+interface GroupMeta {
+  label: string
+  color: string
+  icon: React.ElementType
+}
+
+const GROUP_DIMENSIONS: {
+  key: DimensionKey
+  label: string
+  getKey: (c: Customer) => string
+  groups: Record<string, GroupMeta>
+  subDimensionKey: DimensionKey
+  subDimensionLabel: string
+  getSubKey: (c: Customer) => string
+  subGroups: Record<string, { label: string; color: string }>
+}[] = [
+  {
+    key: 'customerType',
+    label: '客户类型',
+    getKey: (c) => c.customerType,
+    groups: {
+      value: { label: '稳健价值型', color: 'primary', icon: Wallet },
+      active: { label: '积极交易型', color: 'gold', icon: TrendingUp },
+      beginner: { label: '新手小白型', color: 'success', icon: GraduationCap },
+    },
+    subDimensionKey: 'lifecycleStage',
+    subDimensionLabel: '生命周期',
+    getSubKey: (c) => c.lifecycleStage,
+    subGroups: {
+      acquisition: { label: '获客期', color: 'success' },
+      growth: { label: '成长期', color: 'primary' },
+      mature: { label: '成熟期', color: 'gold' },
+      retention: { label: '留存期', color: 'warning' },
+      churn: { label: '流失预警', color: 'destructive' },
+    },
+  },
+  {
+    key: 'lifecycleStage',
+    label: '生命周期',
+    getKey: (c) => c.lifecycleStage,
+    groups: {
+      acquisition: { label: '获客期', color: 'success', icon: Users },
+      growth: { label: '成长期', color: 'primary', icon: TrendingUp },
+      mature: { label: '成熟期', color: 'gold', icon: Award },
+      retention: { label: '留存期', color: 'warning', icon: Heart },
+      churn: { label: '流失预警', color: 'destructive', icon: AlertTriangle },
+    },
+    subDimensionKey: 'customerType',
+    subDimensionLabel: '客户类型',
+    getSubKey: (c) => c.customerType,
+    subGroups: {
+      value: { label: '稳健价值', color: 'primary' },
+      active: { label: '积极交易', color: 'gold' },
+      beginner: { label: '新手小白', color: 'success' },
+    },
+  },
+  {
+    key: 'riskLevel',
+    label: '风险等级',
+    getKey: (c) => c.riskLevel,
+    groups: {
+      conservative: { label: '保守型', color: 'success', icon: Shield },
+      balanced: { label: '平衡型', color: 'primary', icon: Activity },
+      aggressive: { label: '激进型', color: 'gold', icon: Zap },
+    },
+    subDimensionKey: 'customerType',
+    subDimensionLabel: '客户类型',
+    getSubKey: (c) => c.customerType,
+    subGroups: {
+      value: { label: '稳健价值', color: 'primary' },
+      active: { label: '积极交易', color: 'gold' },
+      beginner: { label: '新手小白', color: 'success' },
+    },
+  },
+]
+
+// ===== 客户分组视图 =====
+function CustomerGroupView({ customers: custs, onSelect }: { customers: Customer[]; onSelect: (c: Customer) => void }) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState<string>('all')
+  const [dimensionKey, setDimensionKey] = useState<DimensionKey>('customerType')
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const { toasts, showToast, dismiss } = useToast()
+  const navigate = useNavigate()
 
-  const filtered = custs.filter((c) => {
-    const matchSearch = c.name.includes(searchTerm) || c.city.includes(searchTerm)
-    const matchType = filterType === 'all' || c.customerType === filterType
-    return matchSearch && matchType
-  })
+  const dimension = GROUP_DIMENSIONS.find((d) => d.key === dimensionKey)!
 
+  // 搜索过滤
+  const filtered = useMemo(() => {
+    if (!searchTerm) return custs
+    return custs.filter((c) => c.name.includes(searchTerm) || c.city.includes(searchTerm))
+  }, [custs, searchTerm])
+
+  // 按维度分组
+  const groupedData = useMemo(() => {
+    const groups: Record<string, { meta: GroupMeta; customers: Customer[]; totalAssets: number; avgSatisfaction: number; subDistribution: Record<string, number> }> = {}
+    for (const [key, meta] of Object.entries(dimension.groups)) {
+      groups[key] = { meta, customers: [], totalAssets: 0, avgSatisfaction: 0, subDistribution: {} }
+    }
+    for (const c of filtered) {
+      const key = dimension.getKey(c)
+      if (!groups[key]) continue
+      groups[key].customers.push(c)
+      groups[key].totalAssets += c.totalAssets
+      const subKey = dimension.getSubKey(c)
+      groups[key].subDistribution[subKey] = (groups[key].subDistribution[subKey] || 0) + 1
+    }
+    for (const g of Object.values(groups)) {
+      g.avgSatisfaction = g.customers.length > 0 ? Math.round(g.customers.reduce((s, c) => s + c.satisfaction, 0) / g.customers.length) : 0
+    }
+    return groups
+  }, [filtered, dimension])
+
+  // 总览统计
+  const totalStats = useMemo(() => ({
+    count: filtered.length,
+    totalAssets: filtered.reduce((s, c) => s + c.totalAssets, 0),
+    avgSatisfaction: filtered.length > 0 ? Math.round(filtered.reduce((s, c) => s + c.satisfaction, 0) / filtered.length) : 0,
+  }), [filtered])
+
+  // 组内客户列表（钻取模式）
+  if (selectedGroup && groupedData[selectedGroup]) {
+    const group = groupedData[selectedGroup]
+    const Icon = group.meta.icon
+    return (
+      <div className="flex gap-6">
+        <div className="flex-1 min-w-0 space-y-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setSelectedGroup(null)}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-${group.meta.color}/15`}>
+              <Icon className={`h-5 w-5 text-${group.meta.color}`} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">{group.meta.label}</h1>
+              <p className="text-xs text-muted-foreground">
+                {group.customers.length}位客户 · 总资产 ¥{(group.totalAssets / 10000).toFixed(1)}万 · 平均满意度 {group.avgSatisfaction}%
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {group.customers.map((customer) => (
+              <Card
+                key={customer.id}
+                className="cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md"
+                onClick={() => onSelect(customer)}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-5">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-xl font-bold text-primary">
+                      {customer.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-semibold text-foreground">{customer.name}</h3>
+                        <Badge variant={typeColorMap[customer.customerType] as 'default'}>{customer.typeLabel}</Badge>
+                        <Badge variant={stageColorMap[customer.lifecycleStage] as 'default'}>{customer.stageLabel}</Badge>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/customers/${customer.id}/panorama`) }}
+                          className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-white shadow-sm hover:bg-primary/90 transition-colors"
+                        >
+                          <span>360</span>
+                          <span>全景</span>
+                        </button>
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{customer.city}</span>
+                        <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{customer.occupation}</span>
+                        <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{customer.phone}</span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                        {customer.tags.map((tag) => (
+                          <span key={tag} className="rounded-md bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 xl:gap-8 shrink-0">
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">总资产</p>
+                        <p className="text-lg font-bold text-foreground">¥{(customer.totalAssets / 10000).toFixed(1)}万</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">满意度</p>
+                        <p className="text-lg font-bold text-foreground">{customer.satisfaction}%</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">持有天数</p>
+                        <p className="text-lg font-bold text-foreground">{customer.holdingDays}天</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* 右侧：AI 策略推荐 */}
+        <div className="w-[340px] shrink-0">
+          <div className="sticky top-4">
+            <MOTRecommendationPanel
+              title="客户360 · AI策略推荐"
+              recommendations={allRecommendations}
+              onAdopt={(rec) => showToast(`策略「${rec.title}」已采纳，将在策略中心创建草稿`, 'success')}
+            />
+          </div>
+        </div>
+        <ToastContainer toasts={toasts} dismiss={dismiss} />
+      </div>
+    )
+  }
+
+  // 搜索模式：有搜索词时直接展示搜索结果列表
+  if (searchTerm) {
+    return (
+      <div className="flex gap-6">
+        <div className="flex-1 min-w-0 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">客户画像</h1>
+              <p className="mt-1 text-sm text-muted-foreground">基于13大维度的客户360°全景视图 · {custs.length}位客户</p>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="搜索客户姓名、城市..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-9 w-64 rounded-lg border border-border bg-secondary pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">搜索结果：共 {filtered.length} 位客户</p>
+          <div className="grid grid-cols-1 gap-4">
+            {filtered.map((customer) => (
+              <Card
+                key={customer.id}
+                className="cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md"
+                onClick={() => onSelect(customer)}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-5">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-xl font-bold text-primary">
+                      {customer.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-semibold text-foreground">{customer.name}</h3>
+                        <Badge variant={typeColorMap[customer.customerType] as 'default'}>{customer.typeLabel}</Badge>
+                        <Badge variant={stageColorMap[customer.lifecycleStage] as 'default'}>{customer.stageLabel}</Badge>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/customers/${customer.id}/panorama`) }}
+                          className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-white shadow-sm hover:bg-primary/90 transition-colors"
+                        >
+                          <span>360</span>
+                          <span>全景</span>
+                        </button>
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{customer.city}</span>
+                        <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{customer.occupation}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 xl:gap-8 shrink-0">
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">总资产</p>
+                        <p className="text-lg font-bold text-foreground">¥{(customer.totalAssets / 10000).toFixed(1)}万</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">满意度</p>
+                        <p className="text-lg font-bold text-foreground">{customer.satisfaction}%</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+        <div className="w-[340px] shrink-0">
+          <div className="sticky top-4">
+            <MOTRecommendationPanel
+              title="客户360 · AI策略推荐"
+              recommendations={allRecommendations}
+              onAdopt={(rec) => showToast(`策略「${rec.title}」已采纳，将在策略中心创建草稿`, 'success')}
+            />
+          </div>
+        </div>
+        <ToastContainer toasts={toasts} dismiss={dismiss} />
+      </div>
+    )
+  }
+
+  // 分组总览模式
   return (
     <div className="flex gap-6">
-      {/* 左侧：主内容区 */}
-      <div className="flex-1 min-w-0 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">客户画像</h1>
-          <p className="mt-1 text-sm text-muted-foreground">基于13大维度的客户360°全景视图 · {custs.length}位客户</p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="flex-1 min-w-0 space-y-5">
+        {/* 页面标题 + 搜索 */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">客户画像</h1>
+            <p className="mt-1 text-sm text-muted-foreground">基于13大维度的客户360°全景视图 · {custs.length}位客户</p>
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -172,87 +462,158 @@ function CustomerList({ customers: custs, onSelect }: { customers: Customer[]; o
             />
           </div>
         </div>
-      </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        {[
-          { key: 'all', label: '全部客户' },
-          { key: 'value', label: '稳健价值型' },
-          { key: 'active', label: '积极交易型' },
-          { key: 'beginner', label: '新手小白型' },
-        ].map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setFilterType(item.key)}
-            className={`rounded px-3 py-1.5 text-xs font-medium transition-all ${
-              filterType === item.key
-                ? 'bg-primary/15 text-primary border border-primary/30'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-        <span className="ml-2 text-xs text-muted-foreground">共 {filtered.length} 位客户</span>
-      </div>
-
-      {/* Customer Cards */}
-      <div className="grid grid-cols-1 gap-4">
-        {filtered.map((customer) => (
-          <Card
-            key={customer.id}
-            className="cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md"
-            onClick={() => onSelect(customer)}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-center gap-5">
-                {/* Avatar */}
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-xl font-bold text-primary">
-                  {customer.avatar}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold text-foreground">{customer.name}</h3>
-                    <Badge variant={typeColorMap[customer.customerType] as 'default'}>{customer.typeLabel}</Badge>
-                    <Badge variant={stageColorMap[customer.lifecycleStage] as 'default'}>{customer.stageLabel}</Badge>
-                  </div>
-                  <div className="mt-1.5 flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{customer.city}</span>
-                    <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{customer.occupation}</span>
-                    <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{customer.phone}</span>
-                  </div>
-                  <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-                    {customer.tags.map((tag) => (
-                      <span key={tag} className="rounded-md bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="flex items-center gap-4 xl:gap-8 shrink-0">
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">总资产</p>
-                    <p className="text-lg font-bold text-foreground">¥{(customer.totalAssets / 10000).toFixed(1)}万</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">满意度</p>
-                    <p className="text-lg font-bold text-foreground">{customer.satisfaction}%</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">持有天数</p>
-                    <p className="text-lg font-bold text-foreground">{customer.holdingDays}天</p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </div>
+        {/* 总览统计 */}
+        <div className="grid grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{totalStats.count}</p>
+                <p className="text-xs text-muted-foreground">客户总数</p>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/15">
+                <Wallet className="h-5 w-5 text-gold" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">¥{(totalStats.totalAssets / 10000).toFixed(1)}万</p>
+                <p className="text-xs text-muted-foreground">资产总额</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/15">
+                <Star className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{totalStats.avgSatisfaction}%</p>
+                <p className="text-xs text-muted-foreground">平均满意度</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 分组维度切换 */}
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          {GROUP_DIMENSIONS.map((dim) => (
+            <button
+              key={dim.key}
+              onClick={() => { setDimensionKey(dim.key); setSelectedGroup(null) }}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition-all ${
+                dimensionKey === dim.key
+                  ? 'bg-primary/15 text-primary border border-primary/30'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent'
+              }`}
+            >
+              {dim.label}
+            </button>
+          ))}
+          <span className="ml-2 text-xs text-muted-foreground">{Object.keys(dimension.groups).length} 个分组</span>
+        </div>
+
+        {/* 分组卡片 */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          {Object.entries(groupedData).map(([key, group]) => {
+            const Icon = group.meta.icon
+            const color = group.meta.color
+            const hasCustomers = group.customers.length > 0
+            return (
+              <Card
+                key={key}
+                className={`transition-all duration-200 ${hasCustomers ? 'cursor-pointer hover:border-primary/30 hover:shadow-md' : 'opacity-50'}`}
+                onClick={() => hasCustomers && setSelectedGroup(key)}
+              >
+                <CardContent className="p-5 space-y-4">
+                  {/* 组头 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-${color}/15`}>
+                        <Icon className={`h-5 w-5 text-${color}`} />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-semibold text-foreground">{group.meta.label}</h3>
+                        <p className="text-xs text-muted-foreground">{group.customers.length} 位客户</p>
+                      </div>
+                    </div>
+                    {hasCustomers && <ChevronRight className="h-5 w-5 text-muted-foreground" />}
+                  </div>
+
+                  {/* 统计 */}
+                  {hasCustomers && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg bg-secondary/50 p-2.5 text-center">
+                        <p className="text-sm font-bold text-foreground">¥{(group.totalAssets / 10000).toFixed(1)}万</p>
+                        <p className="text-[10px] text-muted-foreground">总资产</p>
+                      </div>
+                      <div className="rounded-lg bg-secondary/50 p-2.5 text-center">
+                        <p className="text-sm font-bold text-foreground">{group.avgSatisfaction}%</p>
+                        <p className="text-[10px] text-muted-foreground">平均满意度</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 客户头像列表 */}
+                  {hasCustomers && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {group.customers.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={(e) => { e.stopPropagation(); onSelect(c) }}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary hover:bg-primary/20 transition-colors"
+                          title={c.name}
+                        >
+                          {c.avatar}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 子维度分布 */}
+                  {hasCustomers && Object.keys(group.subDistribution).length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-muted-foreground font-medium">{dimension.subDimensionLabel}分布</p>
+                      <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-secondary">
+                        {Object.entries(group.subDistribution).map(([subKey, count]) => {
+                          const subInfo = dimension.subGroups[subKey]
+                          if (!subInfo) return null
+                          const pct = (count / group.customers.length) * 100
+                          return (
+                            <div
+                              key={subKey}
+                              className={`h-full bg-${subInfo.color} transition-all`}
+                              style={{ width: `${pct}%` }}
+                              title={`${subInfo.label}: ${count}人`}
+                            />
+                          )
+                        })}
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                        {Object.entries(group.subDistribution).map(([subKey, count]) => {
+                          const subInfo = dimension.subGroups[subKey]
+                          if (!subInfo) return null
+                          return (
+                            <span key={subKey} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <span className={`h-1.5 w-1.5 rounded-full bg-${subInfo.color}`} />
+                              {subInfo.label} {count}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
       </div>
 
       {/* 右侧：AI 策略推荐 */}
@@ -1358,6 +1719,7 @@ function RFMTab({ customer }: { customer: Customer }) {
 // ===== 客户详情页 =====
 function CustomerDetail({ customer, onBack }: { customer: Customer; onBack: () => void }) {
   const [activeTab, setActiveTab] = useState<TabKey>('behavior')
+  const navigate = useNavigate()
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -1376,6 +1738,13 @@ function CustomerDetail({ customer, onBack }: { customer: Customer; onBack: () =
                 <h1 className="text-xl font-bold text-foreground">{customer.name}</h1>
                 <Badge variant={typeColorMap[customer.customerType] as 'default'}>{customer.typeLabel}</Badge>
                 <Badge variant={stageColorMap[customer.lifecycleStage] as 'default'}>{customer.stageLabel}</Badge>
+                <button
+                  onClick={() => navigate(`/customers/${customer.id}/panorama`)}
+                  className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-white shadow-sm hover:bg-primary/90 transition-colors"
+                >
+                  <span>360</span>
+                  <span>全景</span>
+                </button>
               </div>
               <p className="text-sm text-muted-foreground">{customer.occupation} · {customer.city}</p>
             </div>
@@ -1462,7 +1831,7 @@ export default function CustomersPage() {
 
   return (
     <div className="animate-fade-in">
-      <CustomerList customers={customers} onSelect={setSelectedCustomer} />
+      <CustomerGroupView customers={customers} onSelect={setSelectedCustomer} />
     </div>
   )
 }
